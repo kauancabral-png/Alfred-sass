@@ -3,6 +3,11 @@ import Layout from '../components/Layout';
 import { 
   LineChart, 
   Line, 
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -18,10 +23,13 @@ import {
   TrendingUp,
   Clock,
   ArrowRightLeft,
-  Apple
+  Apple,
+  User,
+  Target
 } from 'lucide-react';
 
 export default function Dashboard() {
+  const COLORS = ['#0284C7', '#16A34A', '#D97706', '#EA580C', '#8B5CF6', '#F59E0B', '#10B981'];
   // Dados estáticos baseados na imagem
   const ritmoData = [
     { day: '1', esteMes: 0, mesPassado: 0 },
@@ -39,6 +47,37 @@ export default function Dashboard() {
     { id: 3, desc: 'Pagamento de Pix QR Code ZAPIZI', cat: 'Serviços', val: '-R$ 10,00', icon: ArrowRightLeft },
     { id: 4, desc: 'Compra débito MERCADAO ATACADISTA', cat: 'Supermercado', val: '-R$ 13,98', icon: CreditCard },
     { id: 5, desc: 'Compra débito MERCADAO ATACADISTA', cat: 'Supermercado', val: '-R$ 6,18', icon: CreditCard },
+  ];
+
+  const userName = 'Steven';
+  const userCurrency = 'R$';
+  const userLocale = 'pt-BR';
+  const totalBalance = 800000;
+  const incomes = 70000;
+  const expenses = 42000;
+  
+  const chartData = [
+    { name: 'Jan', receitas: 4000, despesas: 2400 },
+    { name: 'Feb', receitas: 3000, despesas: 1398 },
+    { name: 'Mar', receitas: 2000, despesas: 3800 },
+    { name: 'Apr', receitas: 2780, despesas: 3908 },
+    { name: 'May', receitas: 1890, despesas: 4800 },
+    { name: 'Jun', receitas: 2390, despesas: 3800 },
+    { name: 'Jul', receitas: 3490, despesas: 4300 },
+  ];
+
+  const expenseSummary = [
+    ['Surgery', { total: 12000 }],
+    ['Cardiology', { total: 8000 }],
+    ['Neurology', { total: 4000 }],
+    ['Medicine', { total: 3000 }],
+  ];
+  const totalExpenseSum = 27000;
+
+  const filteredTransactions = [
+    { id: 1, description: 'Dr. Thomas White (Cardiology)', type: 'INCOME', amount: 250.00, date: '2026-06-10T10:00:00' },
+    { id: 2, description: 'Medical Supplies', type: 'EXPENSE', amount: 5000.00, date: '2026-06-05T10:00:00' },
+    { id: 3, description: 'Dr. Emilia Williamson (Surgery)', type: 'INCOME', amount: 450.00, date: '2026-06-11T10:00:00' },
   ];
 
   return (
