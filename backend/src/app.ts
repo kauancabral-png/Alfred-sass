@@ -115,6 +115,66 @@ app.get('/api/admin/release-everyone', async (req, res) => {
     } catch(e:any) { res.status(500).json({ error: e.message }); }
 });
 
+// DISPARO EM MASSA DE EMAIL DE ATUALIZAÇÃO
+app.get('/api/admin/send-mass-email', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            where: { email: { not: '' } },
+            select: { email: true, name: true }
+        });
+        
+        let successCount = 0;
+        
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '465'),
+            secure: true,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+
+        // Executa em background para nao dar timeout na request
+        setTimeout(async () => {
+            for (const user of users) {
+                try {
+                    const mailOptions = {
+                        from: \`"Alfred Financeiro" <\${process.env.SMTP_USER}>\`,
+                        to: user.email,
+                        subject: \`Aviso Importante: Actualización de Servidores 🚀\`,
+                        html: \`
+                            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+                                <h2>¡Hola \${user.name.split(' ')[0]}, todo está bien!</h2>
+                                <p>Estábamos actualizando los servidores, ¡ahora funcionan normalmente!</p>
+                                
+                                <p><strong>Paso 1:</strong> Haz clic en el enlace de inicio de sesión 👉 <a href="https://alfred-saas-premium.vercel.app/login" style="color: #0066cc; font-weight: bold;">https://alfred-saas-premium.vercel.app/login</a></p>
+                                
+                                <p><strong>Paso 2:</strong> Inicia sesión con el correo electrónico que usaste para la compra.</p>
+                                
+                                <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <p style="margin: 0;"><strong>Contraseña temporal:</strong> <span style="font-size: 18px; font-weight: bold; color: #000;">alfred123</span></p>
+                                </div>
+                                
+                                <p><em>Puedes cambiarla al iniciar sesión.</em></p>
+                                
+                                <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:seualfredapp@gmail.com">seualfredapp@gmail.com</a>. ¡Estaremos encantados de ayudarte! 🎩</p>
+                            </div>
+                        \`
+                    };
+                    await transporter.sendMail(mailOptions);
+                    successCount++;
+                    await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+                } catch (e) {}
+            }
+            console.log(\`Mass email complete. Sent: \${successCount}\`);
+        }, 100);
+
+        return res.json({ message: \`Disparo em massa iniciado para \${users.length} clientes em background!\` });
+    } catch(e:any) { res.status(500).json({ error: e.message }); }
+});
+
 // Painel Secreto: Criação Manual de Membros Pelo Navegador
 app.get('/api/admin/force-create/:token', async (req, res) => {
     try {
