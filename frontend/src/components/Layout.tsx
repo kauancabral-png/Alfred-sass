@@ -9,11 +9,14 @@ import {
   LogOut,
   Menu,
   X,
-  Search,
-  Moon,
-  Bell,
+  MessageCircle,
+  ArrowUpCircle,
+  ArrowDownCircle,
   ShoppingCart,
-  Car
+  Car,
+  AlertTriangle,
+  Layers,
+  User
 } from 'lucide-react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -26,11 +29,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const [personalProfileId, setPersonalProfileId] = useState<string | null>(null);
   const [businessProfileId, setBusinessProfileId] = useState<string | null>(null);
-  const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    setUserName(localStorage.getItem('userName') || localStorage.getItem('userEmail')?.split('@')[0] || 'Mestre');
-    
     const fetchProfiles = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -47,6 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           if (personal) setPersonalProfileId(personal.id);
           if (business) setBusinessProfileId(business.id);
           
+          // Ensure activeProfileId is initially set
           const savedMode = localStorage.getItem('profileMode') || 'personal';
           const activeId = savedMode === 'business' ? business?.id : personal?.id;
           if (activeId) {
@@ -72,136 +73,160 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     navigate('/login');
   };
 
-  const toggleProfileMode = (mode: 'personal' | 'business') => {
-    if (profileMode === mode) return;
-    setProfileMode(mode);
-    localStorage.setItem('profileMode', mode);
+  const toggleProfileMode = () => {
+    const newMode = profileMode === 'personal' ? 'business' : 'personal';
+    setProfileMode(newMode);
+    localStorage.setItem('profileMode', newMode);
     
-    const activeId = mode === 'business' ? businessProfileId : personalProfileId;
+    // Globally sync activeProfileId so all pages know what to fetch
+    const activeId = newMode === 'business' ? businessProfileId : personalProfileId;
     if (activeId) {
        localStorage.setItem('activeProfileId', activeId);
     }
+    
     window.dispatchEvent(new Event('profileModeChanged'));
   };
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Movimentações', path: '/transactions', icon: ArrowRightLeft },
-    { label: 'Relatórios', path: '/reports', icon: PieChart },
-    { label: 'Metas', path: '/goals', icon: Target },
-    { label: 'Supermercado', path: '/mercado', icon: ShoppingCart },
-    { label: 'Garagem', path: '/veiculos', icon: Car },
-    { label: 'Configurações', path: '/settings', icon: Settings },
+  const personalMenu = [
+    { icon: LayoutDashboard, label: 'Visão Geral', path: '/dashboard' },
+    { icon: ArrowRightLeft, label: 'Transações', path: '/transactions' },
+    { icon: ArrowUpCircle, label: 'Receitas', path: '/receitas' },
+    { icon: ArrowDownCircle, label: 'Despesas', path: '/despesas' },
+    { icon: Layers, label: 'Categorias', path: '/categorias' },
+    { icon: ShoppingCart, label: 'Mercado', path: '/mercado' },
+    { icon: Car, label: 'Veículos', path: '/veiculos' },
+    { icon: AlertTriangle, label: 'Dívidas', path: '/dividas' },
+    { icon: Target, label: 'Metas', path: '/goals' },
+    { icon: PieChart, label: 'Relatórios', path: '/reports' },
+    { icon: MessageCircle, label: 'Alfred AI', path: '/bot' },
+    { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
 
+  const businessMenu = [
+    { icon: LayoutDashboard, label: 'Painel de Negócios', path: '/dashboard' },
+    { icon: ArrowRightLeft, label: 'Fluxo de Caixa', path: '/transactions?category=flujo' },
+    { icon: PieChart, label: 'DRE / Resultados', path: '/reports?view=er' },
+    { icon: AlertTriangle, label: 'Contas a Pagar/Receber', path: '/dividas' },
+    { icon: User, label: 'Folha de Pagamento', path: '/transactions?category=payroll' },
+    { icon: ShoppingCart, label: 'Insumos e Estoque', path: '/mercado' },
+    { icon: Car, label: 'Logística e Frota', path: '/veiculos' },
+    { icon: Target, label: 'Metas (KPIs)', path: '/goals' },
+    { icon: Settings, label: 'Configurações', path: '/settings' },
+  ];
+
+  const menuItems = profileMode === 'personal' ? personalMenu : businessMenu;
+  const isBusiness = profileMode === 'business';
+  
+  const bgLayout = isBusiness ? 'bg-[#0A0A0A]' : 'bg-[#F4F7FA]';
+  const bgSidebar = 'bg-[#111111]';
+  const borderClass = 'border-white/5';
+  const textClass = 'text-white';
+  const textMuted = 'text-gray-400';
+  const logoSrc = '/logo-alfred-white.png';
+
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-dark-bg text-white font-sans selection:bg-primary selection:text-black">
-      
-      {/* Top Navigation Bar */}
-      <nav className="sticky top-0 z-50 glass px-6 lg:px-12 py-4 flex items-center justify-between border-b border-dark-border">
-        {/* Left: Logo & Menus */}
-        <div className="flex items-center gap-8">
-          <NavLink to="/dashboard" className="flex-shrink-0 hover:opacity-80 transition-opacity">
-            <img src="/logo-alfred-white.png" alt="Alfred Logo" className="h-8 object-contain" />
-          </NavLink>
-          
-          <div className="hidden lg:flex items-center gap-1">
+    <div className={`flex h-[100dvh] overflow-hidden ${bgLayout} font-sans`}>
+      {/* Mobile Header */}
+      <div className={`md:hidden fixed top-0 w-full z-50 flex items-center justify-center p-4 ${bgSidebar} border-b ${borderClass} h-16 shadow-sm`}>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          className="absolute left-4 z-10 p-2 text-white hover:opacity-80"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+        <NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-80 transition-opacity z-0 flex items-center justify-center">
+           <img src={logoSrc} alt="Alfred Logo" className="h-10 object-contain" />
+        </NavLink>
+      </div>
+
+      {/* Sidebar */}
+      <aside 
+        className={`${
+          isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        } md:translate-x-0 fixed md:static inset-y-0 left-0 z-40 w-64 ${bgSidebar} border-r ${borderClass} transition-all duration-300 ease-in-out flex flex-col`}
+      >
+        <div className="hidden md:block">
+          <div className={`p-6 flex items-center justify-center border-b ${borderClass} mb-2`}>
+            <NavLink to="/dashboard" className="flex items-center justify-center transition-opacity hover:opacity-80">
+              <img src={logoSrc} alt="Alfred Logo" className="h-14 object-contain drop-shadow-sm" />
+            </NavLink>
+          </div>
+          <div className="px-4 mb-2 mt-2">
+            <div className="bg-[#1a1a1a] p-1 rounded-xl flex items-center">
+              <button 
+                onClick={() => profileMode !== 'personal' && toggleProfileMode()}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'personal' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+              >
+                Pessoal
+              </button>
+              <button 
+                onClick={() => profileMode !== 'business' && toggleProfileMode()}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+              >
+                Empresarial
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto py-2 px-4 space-y-1 mt-16 md:mt-0">
+            <div className="md:hidden bg-[#1a1a1a] p-1 rounded-xl flex items-center mb-4 mt-2">
+              <button 
+                onClick={() => profileMode !== 'personal' && toggleProfileMode()}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'personal' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+              >
+                Pessoal
+              </button>
+              <button 
+                onClick={() => profileMode !== 'business' && toggleProfileMode()}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+              >
+                Empresarial
+              </button>
+            </div>
+            <div className={`text-[11px] uppercase text-gray-500 font-bold mb-4 tracking-wider pl-3 mt-2`}>Menú Principal</div>
             {menuItems.map((item) => {
-              const isActive = location.pathname === item.path || (item.path === '/transactions' && location.pathname.includes('/receitas'));
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              
               return (
                 <NavLink 
                   key={item.label} 
                   to={item.path}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-full transition-all duration-200 ${
                     isActive 
-                      ? 'bg-white/10 text-primary' 
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      ? (isBusiness ? 'bg-[#00FF00]/10 text-[#00FF00] font-semibold' : 'bg-[#2a2a2a] text-white font-semibold shadow-sm')
+                      : `${textMuted} hover:bg-[#1a1a1a] hover:${textClass}`
                   }`}
                 >
-                  {item.label}
+                  <Icon className={`w-4 h-4 ${isActive ? (isBusiness ? 'text-[#00FF00]' : 'text-white') : ''}`} />
+                  <span className="text-sm">{item.label}</span>
                 </NavLink>
               );
             })}
-          </div>
         </div>
 
-        {/* Right: Actions & Profile */}
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-4 text-neutral-400">
-             <button className="hover:text-white transition-colors"><Search className="w-5 h-5" /></button>
-             <button className="hover:text-white transition-colors"><Moon className="w-5 h-5" /></button>
-             <button className="hover:text-white transition-colors relative">
-               <Bell className="w-5 h-5" />
-               <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-             </button>
-          </div>
-
-          <div className="h-8 w-[1px] bg-dark-border hidden md:block"></div>
-
-          {/* Profile Switcher & Info */}
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end">
-               <span className="text-sm font-bold tracking-tight">Olá, {userName} 👋</span>
-               <span className="text-[10px] text-neutral-500 font-medium">Seu mordomo financeiro a postos.</span>
-            </div>
-
-            {/* Selector de Perfil Animado */}
-            <div className="bg-[#1A1A1A] p-1 rounded-full flex items-center border border-dark-border relative">
-               <div 
-                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-dark-bg rounded-full shadow-md transition-transform duration-300 ease-in-out border border-white/5"
-                  style={{ transform: profileMode === 'business' ? 'translateX(100%)' : 'translateX(0)' }}
-               />
-               <button 
-                  onClick={() => toggleProfileMode('personal')}
-                  className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1 ${profileMode === 'personal' ? 'text-white' : 'text-neutral-500'}`}
-               >
-                  🧍 <span className="hidden sm:inline">Pessoal</span>
-               </button>
-               <button 
-                  onClick={() => toggleProfileMode('business')}
-                  className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1 ${profileMode === 'business' ? 'text-primary' : 'text-neutral-500'}`}
-               >
-                  🏢 <span className="hidden sm:inline">Empresa</span>
-               </button>
-            </div>
-
-            <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-dark-border flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all">
-               <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-neutral-400 hover:text-white">
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <div className={`p-4 border-t ${borderClass} mt-auto`}>
+          <button onClick={handleLogout} className={`flex items-center gap-3 px-4 py-3 w-full rounded-full ${textMuted} hover:bg-red-500/10 hover:text-red-400 transition-colors`}>
+            <LogOut className="w-5 h-5" />
+            <span className="text-sm font-medium">Sair</span>
           </button>
         </div>
-      </nav>
+      </aside>
 
-      {/* Mobile Menu Dropdown */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed top-[73px] left-0 right-0 glass border-b border-dark-border z-40 p-4 animate-in slide-in-from-top-2">
-           <div className="flex flex-col gap-2">
-              {menuItems.map((item) => (
-                <NavLink 
-                  key={item.label} 
-                  to={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
-                    isActive 
-                      ? 'bg-white/10 text-primary' 
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" /> {item.label}
-                </NavLink>
-              ))}
-           </div>
+      {/* Main Content */}
+      <main className={`flex-1 overflow-y-auto overflow-x-hidden pt-16 md:pt-0 ${bgLayout}`}>
+        <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-full">
+          {children}
         </div>
-      )}
-
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-8 lg:p-12 relative">
-        {children}
       </main>
+      
+      {/* Mobile Back-drop */}
+      <div 
+        className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
     </div>
   );
 }

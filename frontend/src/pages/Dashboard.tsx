@@ -1,52 +1,78 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { 
-  AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, PieChart, Pie, Cell
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  ResponsiveContainer,
+  Tooltip,
+  Legend
 } from 'recharts';
 import { 
-  MessageCircle, TrendingUp, TrendingDown, Activity, 
-  Target, ShoppingCart, Car, DollarSign, Wallet, ArrowRight,
-  ShieldCheck, Zap, ArrowUpRight, ArrowDownRight, Smartphone, Mic, Monitor
+  CreditCard,
+  MessageCircle,
+  TrendingDown,
+  TrendingUp,
+  Clock,
+  ArrowRightLeft,
+  Apple,
+  User,
+  ArrowUpRight,
+  Target,
+  Info,
+  FileText,
+  ShoppingCart,
+  Car
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [goals, setGoals] = useState<any[]>([]);
-  const [vehicles, setVehicles] = useState<any[]>([]);
-  const [market, setMarket] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [profileMode, setProfileMode] = useState<'personal' | 'business'>(() => {
     return (localStorage.getItem('profileMode') as 'personal' | 'business') || 'personal';
   });
 
-  const userName = localStorage.getItem('userName') || 'Usuário';
-  const userCurrency = localStorage.getItem('userCurrency') || 'R$';
-  const userLocale = localStorage.getItem('userLocale') || 'pt-BR';
+  const [personalProfileId, setPersonalProfileId] = useState<string | null>(null);
+  const [businessProfileId, setBusinessProfileId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfilesAndTransactions = async () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const activeId = localStorage.getItem('activeProfileId');
-        if (activeId) {
-          const headers = { Authorization: `Bearer ${token}` };
-          const [txRes, goalsRes, vehiclesRes, marketRes] = await Promise.all([
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${activeId}&_t=${Date.now()}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/goals?profileId=${activeId}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/vehicles?profileId=${activeId}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${activeId}`, { headers }),
-          ]);
+        const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/auth/me?cache=${Date.now()}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const profiles = data.profiles || [];
+          const personal = profiles.find((p: any) => p.type === 'PERSONAL');
+          const business = profiles.find((p: any) => p.type === 'BUSINESS');
           
-          if (txRes.ok) setTransactions(await txRes.json());
-          if (goalsRes.ok) setGoals(await goalsRes.json());
-          if (vehiclesRes.ok) setVehicles(await vehiclesRes.json());
-          if (marketRes.ok) setMarket(await marketRes.json());
+          if (personal) setPersonalProfileId(personal.id);
+          if (business) setBusinessProfileId(business.id);
+          
+          const activeId = profileMode === 'business' ? business?.id : personal?.id;
+          
+          if (activeId) {
+             const txRes = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${activeId}&_t=${new Date().getTime()}`, {
+               headers: { Authorization: `Bearer ${token}` }
+             });
+             if (txRes.ok) {
+               setTransactions(await txRes.json());
+             }
+          }
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
-    fetchData();
+    fetchProfilesAndTransactions();
 
     const handleStorageChange = () => {
       const mode = localStorage.getItem('profileMode') as 'personal' | 'business';
@@ -56,301 +82,242 @@ export default function Dashboard() {
     return () => window.removeEventListener('profileModeChanged', handleStorageChange);
   }, [profileMode]);
 
+  // Profile data
+  const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail')?.split('@')[0] || 'Mestre';
   const isBusiness = profileMode === 'business';
 
-  // Cálculos Básicos
-  const totalIncome = transactions.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + Number(t.amount), 0);
-  const totalExpense = Math.abs(transactions.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + Number(t.amount), 0));
-  const balance = totalIncome - totalExpense;
-  const savings = totalIncome - totalExpense;
-  const profitMargin = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
+  // Theming variables
+  const bgCard = isBusiness ? 'bg-[#111111]' : 'bg-white';
+  const bgSubCard = isBusiness ? 'bg-[#1a1a1a]' : 'bg-gray-50';
+  const textTitle = isBusiness ? 'text-white' : 'text-gray-900';
+  const textSub = isBusiness ? 'text-gray-400' : 'text-gray-500';
+  const borderClass = isBusiness ? 'border-white/5' : 'border-gray-100';
 
-  const formatMoney = (val: number) => `${userCurrency} ${val.toLocaleString(userLocale, { minimumFractionDigits: 2 })}`;
+  // Dynamic calculations
+  const totalExpense = useMemo(() => {
+    return transactions.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + Number(t.amount), 0);
+  }, [transactions]);
 
-  // Gráfico de Fluxo
+  const totalIncome = useMemo(() => {
+    return transactions.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + Number(t.amount), 0);
+  }, [transactions]);
+
+  const totalBalance = totalIncome - totalExpense;
+
   const chartData = useMemo(() => {
     const data: Record<string, { name: string, receitas: number, despesas: number }> = {};
     transactions.forEach(t => {
       const date = new Date(t.date);
-      const month = date.toLocaleDateString(userLocale, { month: 'short' });
+      const month = date.toLocaleDateString('pt-BR', { month: 'short' });
       if (!data[month]) data[month] = { name: month, receitas: 0, despesas: 0 };
       if (t.type === 'INCOME') data[month].receitas += Number(t.amount);
-      else data[month].despesas += Math.abs(Number(t.amount));
+      else data[month].despesas += Number(t.amount);
     });
-    return Object.values(data).reverse().slice(-6); // Últimos 6 meses no gráfico
-  }, [transactions, userLocale]);
+    // Convert to array and reverse to get chronological order (assuming latest transactions first)
+    return Object.values(data).reverse();
+  }, [transactions]);
 
-  const recentTx = transactions.slice(0, 5);
+  const expenseSummary = useMemo(() => {
+    const categoryTotals: Record<string, { total: number }> = {};
+    transactions.filter(t => t.type === 'EXPENSE').forEach(t => {
+      const cat = t.categoryId?.name || 'Geral';
+      if (!categoryTotals[cat]) categoryTotals[cat] = { total: 0 };
+      categoryTotals[cat].total += Number(t.amount);
+    });
+    return Object.entries(categoryTotals).sort((a, b) => b[1].total - a[1].total);
+  }, [transactions]);
 
-  const renderPersonalRow1 = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {/* Card 1: Saúde Financeira */}
-      <div className="glass rounded-[2rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-6 opacity-20"><ShieldCheck className="w-24 h-24 text-primary" /></div>
-        <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6 relative z-10">Saúde Financeira Alfred</h3>
-        <div className="relative w-32 h-32 flex items-center justify-center mb-6 z-10">
-           <svg className="w-full h-full transform -rotate-90">
-             <circle cx="64" cy="64" r="60" stroke="#2A2A2A" strokeWidth="8" fill="none" />
-             <circle cx="64" cy="64" r="60" stroke="#00FF00" strokeWidth="8" fill="none" strokeDasharray="377" strokeDashoffset="49" className="transition-all duration-1000" />
-           </svg>
-           <div className="absolute flex flex-col items-center">
-             <span className="text-3xl font-black text-white">87</span>
-             <span className="text-[10px] text-primary font-bold uppercase">/ 100</span>
-           </div>
-        </div>
-        <div className="relative z-10">
-           <p className="text-xs text-neutral-500 font-medium mb-1">Saldo Atual</p>
-           <p className="text-3xl font-black text-white mb-2">{formatMoney(balance)}</p>
-           <p className="text-xs font-bold text-primary flex items-center gap-1 justify-center"><TrendingUp className="w-3 h-3" /> +18% vs Mês Passado</p>
-        </div>
-      </div>
+  const recentTransactions = transactions.slice(0, 15);
 
-      {/* Card 2: Resumo do Mês */}
-      <div className="glass rounded-[2rem] p-8 flex flex-col justify-between">
-         <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-6">Resumo do Mês</h3>
-         <div className="space-y-4 mb-6">
-            <div className="flex justify-between items-center">
-               <span className="text-sm font-medium text-neutral-400">Receitas</span>
-               <span className="text-lg font-black text-white">{formatMoney(totalIncome)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-               <span className="text-sm font-medium text-neutral-400">Despesas</span>
-               <span className="text-lg font-black text-white">{formatMoney(totalExpense)}</span>
-            </div>
-            <div className="h-[1px] w-full bg-dark-border"></div>
-            <div className="flex justify-between items-center">
-               <span className="text-sm font-medium text-neutral-400">Economia</span>
-               <span className="text-lg font-black text-primary">{formatMoney(savings)}</span>
-            </div>
-         </div>
-         <div className="h-24 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={chartData.slice(-3)}>
-                  <Bar dataKey="receitas" fill="#00FF00" radius={[4,4,0,0]} barSize={10} />
-                  <Bar dataKey="despesas" fill="#333333" radius={[4,4,0,0]} barSize={10} />
-               </BarChart>
-            </ResponsiveContainer>
-         </div>
-      </div>
+  const formatCurrency = (val: number) => {
+    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
 
-      {/* Card 3: Alfred IA */}
-      <div className="glass rounded-[2rem] p-8 flex flex-col relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full"></div>
-         <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Zap className="w-5 h-5 text-primary" /></div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Alfred IA</h3>
-         </div>
-         <p className="text-2xl font-black text-white mb-6 leading-tight">Como posso ajudar você hoje, {userName}?</p>
-         
-         <div className="space-y-3 mb-6 flex-1">
-            <div className="bg-dark-bg border border-dark-border p-3 rounded-xl text-xs text-neutral-400 hover:text-white hover:border-primary/50 transition-all cursor-pointer flex justify-between items-center group">
-               Analisar meus gastos <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
-            </div>
-            <div className="bg-dark-bg border border-dark-border p-3 rounded-xl text-xs text-neutral-400 hover:text-white hover:border-primary/50 transition-all cursor-pointer flex justify-between items-center group">
-               Onde posso economizar? <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
-            </div>
-         </div>
-
-         <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-start gap-3">
-            <MessageCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-            <p className="text-[11px] font-medium text-primary/90 italic">"Seus gastos com mercado aumentaram 15% este mês comparado ao mês anterior."</p>
-         </div>
-      </div>
-    </div>
-  );
-
-  const renderBusinessRow1 = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div className="glass rounded-[2rem] p-8 flex flex-col justify-center">
-         <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mb-6"><TrendingUp className="w-6 h-6 text-white" /></div>
-         <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest mb-2">Faturamento Bruto</p>
-         <p className="text-3xl font-black text-white">{formatMoney(totalIncome)}</p>
-      </div>
-      <div className="glass rounded-[2rem] p-8 flex flex-col justify-center">
-         <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6"><TrendingDown className="w-6 h-6 text-red-500" /></div>
-         <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest mb-2">Despesas Operacionais</p>
-         <p className="text-3xl font-black text-white">{formatMoney(totalExpense)}</p>
-      </div>
-      <div className="glass rounded-[2rem] p-8 flex flex-col justify-center">
-         <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-6"><Wallet className="w-6 h-6 text-primary" /></div>
-         <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest mb-2">Lucro Líquido</p>
-         <p className="text-3xl font-black text-primary">{formatMoney(balance)}</p>
-      </div>
-      <div className="glass rounded-[2rem] p-8 flex flex-col justify-center relative overflow-hidden">
-         <div className="absolute right-0 bottom-0 p-4 opacity-5"><Activity className="w-32 h-32 text-white" /></div>
-         <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest mb-2">Margem de Lucro</p>
-         <p className="text-5xl font-black text-white mb-2">{profitMargin.toFixed(1)}%</p>
-         <div className="w-full bg-dark-bg h-2 rounded-full overflow-hidden">
-            <div className="bg-primary h-full" style={{ width: `${Math.max(0, Math.min(100, profitMargin))}%` }}></div>
-         </div>
-      </div>
-    </div>
-  );
+  const COLORS = ['#0284C7', '#16A34A', '#D97706', '#EA580C', '#8B5CF6', '#F59E0B', '#10B981'];
 
   return (
-    <div className="animate-in fade-in duration-500">
-      {/* Header Contextual */}
-      <div className="mb-10 flex justify-between items-end">
-         <div>
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-2">
-               {isBusiness ? 'Inteligência Corporativa' : 'Visão Geral'}
-            </h1>
-            <p className="text-neutral-400 font-medium text-sm md:text-base">
-               {isBusiness ? 'DRE Inteligente e Fluxo de Caixa Empresarial.' : 'Acompanhe seu patrimônio em tempo real.'}
-            </p>
-         </div>
-      </div>
+    <Layout>
+      <div className="min-h-screen pb-20 fade-in px-4 md:px-8">
+        {/* Header de Gestão Mestre */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6 md:gap-8 overflow-hidden">
+           <div className="w-full min-w-0">
+              <div className="flex items-center gap-4 mb-2">
+                 <div className="w-12 h-12 shrink-0 bg-black text-white rounded-2xl flex items-center justify-center shadow-md border border-white/10">
+                    <User className="w-6 h-6" />
+                 </div>
+                 <div className="flex flex-col min-w-0">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isBusiness ? 'text-[#00FF00]' : 'text-gray-400'} truncate`}>
+                      {isBusiness ? 'Painel Empresarial' : 'Painel Pessoal'}
+                    </span>
+                    <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${textTitle} tracking-tight truncate`}>Olá, {userName}!</h1>
+                 </div>
+              </div>
+           </div>
+        </div>
 
-      {/* Linha 1 */}
-      {isBusiness ? renderBusinessRow1() : renderPersonalRow1()}
+        {/* Cards Principais - Hospitally Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
+            <div className={`${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 group hover:-translate-y-1 transition-all flex flex-col justify-between`}>
+                <div className="flex justify-between items-start mb-6">
+                   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm"><CreditCard className="w-6 h-6"/></div>
+                   <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">+0%</span>
+                </div>
+                <div>
+                   <h2 className={`text-3xl font-bold ${textTitle} mb-1`}>{formatCurrency(totalBalance)}</h2>
+                   <h4 className={`text-sm font-medium ${textSub}`}>Saldo Atual</h4>
+                </div>
+            </div>
 
-      {/* Linha 2: Gráficos e Transações */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-         <div className="lg:col-span-2 glass rounded-[2.5rem] p-8 md:p-10 flex flex-col">
-            <div className="flex justify-between items-center mb-10">
-               <h3 className="text-base font-bold text-white uppercase tracking-widest">Fluxo de Caixa</h3>
-               <div className="flex gap-2">
-                  {['7D', '30D', '3M', '6M', '1A'].map(filter => (
-                     <button key={filter} className="px-4 py-2 text-[10px] font-bold text-neutral-400 uppercase bg-dark-bg rounded-full border border-dark-border hover:text-white transition-colors">{filter}</button>
+            <div className={`${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 group hover:-translate-y-1 transition-all flex flex-col justify-between`}>
+                <div className="flex justify-between items-start mb-6">
+                   <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm"><TrendingUp className="w-6 h-6"/></div>
+                   <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">+0%</span>
+                </div>
+                <div>
+                   <h2 className={`text-3xl font-bold ${textTitle} mb-1`}>{formatCurrency(totalIncome)}</h2>
+                   <h4 className={`text-sm font-medium ${textSub}`}>Receitas (Mês)</h4>
+                </div>
+            </div>
+
+            <div className={`${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 group hover:-translate-y-1 transition-all flex flex-col justify-between`}>
+                <div className="flex justify-between items-start mb-6">
+                   <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 shadow-sm"><TrendingDown className="w-6 h-6"/></div>
+                   <span className="text-xs font-bold text-red-500 bg-red-500/10 px-2.5 py-1 rounded-full">-0%</span>
+                </div>
+                <div>
+                   <h2 className={`text-3xl font-bold ${textTitle} mb-1`}>{formatCurrency(totalExpense)}</h2>
+                   <h4 className={`text-sm font-medium ${textSub}`}>Despesas (Mês)</h4>
+                </div>
+            </div>
+
+            <div className={`${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 group hover:-translate-y-1 transition-all flex flex-col justify-between`}>
+                <div className="flex justify-between items-start mb-6">
+                   <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shadow-sm"><Target className="w-6 h-6"/></div>
+                   <span className="text-xs font-bold text-orange-500 bg-orange-500/10 px-2.5 py-1 rounded-full">-0%</span>
+                </div>
+                <div>
+                   <h2 className={`text-3xl font-bold ${textTitle} mb-1`}>{formatCurrency(totalExpense / 30)}</h2>
+                   <h4 className={`text-sm font-medium ${textSub}`}>Média Diária</h4>
+                </div>
+            </div>
+        </div>
+
+        {/* Gráfico de Despesas e Categorias - Donut Style (Hospitally) */}
+        <div className={`${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 mb-8 md:mb-12`}>
+           <div className="flex justify-between items-center mb-6">
+              <h3 className={`text-base font-bold ${textTitle}`}>Top Despesas</h3>
+           </div>
+           
+           <div className="flex flex-col items-center justify-center w-full">
+              {/* Chart */}
+              <div className="w-full h-[250px] md:h-[300px] mb-6">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                       <Pie
+                          data={expenseSummary.map(([name, data]) => ({ name, value: data.total }))}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={75}
+                          outerRadius={110}
+                          paddingAngle={5}
+                          dataKey="value"
+                          stroke="none"
+                       >
+                          {expenseSummary.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                       </Pie>
+                       <Tooltip contentStyle={{borderRadius: '1rem', background: isBusiness ? '#1a1a1a' : '#fff', border: `1px solid ${isBusiness ? '#333' : '#E5E7EB'}`, color: isBusiness ? '#fff' : '#111827', fontWeight: 600}} />
+                    </PieChart>
+                 </ResponsiveContainer>
+              </div>
+
+              {/* Legend List (Horizontal) */}
+              <div className="w-full flex flex-wrap justify-center items-center gap-x-6 gap-y-3">
+                 {expenseSummary.length > 0 ? expenseSummary.map(([name, data], idx) => {
+                    const percentage = totalExpense > 0 ? ((data.total / totalExpense) * 100).toFixed(1) : '0.0';
+                    return (
+                       <div key={name} className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                          <span className={`text-sm font-medium ${textSub}`}>{name} <span className="font-semibold text-gray-400 ml-1">({percentage}%)</span></span>
+                       </div>
+                    );
+                 }) : (
+                    <div className="text-center py-4 w-full text-gray-500">
+                       <Info className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                       <p className="text-xs font-medium">Sem registros de gastos</p>
+                    </div>
+                 )}
+              </div>
+           </div>
+        </div>
+
+        {/* Gráficos Detalhados e Transações Recentes */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+            
+            {/* Area Chart - Col Span 8 */}
+            <div className={`lg:col-span-8 ${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 flex flex-col`}>
+               <div className="flex justify-between items-center mb-8">
+                  <h4 className={`text-sm font-bold uppercase tracking-wider ${textTitle}`}>Fluxo de Caixa</h4>
+               </div>
+               <div className="h-[300px] md:h-[350px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                     <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                           <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
+                              <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                           </linearGradient>
+                           <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.2}/>
+                              <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                           </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isBusiness ? "#333" : "#F3F4F6"} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 11, fontWeight: 500}} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 11, fontWeight: 500}} width={60} tickFormatter={(val) => `R$ ${val/1000}k`} />
+                        <Tooltip 
+                            contentStyle={{backgroundColor: isBusiness ? '#1a1a1a' : '#fff', borderRadius: '1rem', border: `1px solid ${isBusiness ? '#333' : '#E5E7EB'}`, color: isBusiness ? '#fff' : '#111827'}} 
+                        />
+                        <Area type="monotone" dataKey="receitas" stroke="#10B981" strokeWidth={2.5} fillOpacity={1} fill="url(#greenGradient)" activeDot={{r: 6, fill: '#10B981', strokeWidth: 0}} />
+                        <Area type="monotone" dataKey="despesas" stroke="#EF4444" strokeWidth={2.5} strokeDasharray="5 5" fillOpacity={1} fill="url(#redGradient)" activeDot={{r: 6, fill: '#EF4444', strokeWidth: 0}} />
+                     </AreaChart>
+                  </ResponsiveContainer>
+               </div>
+            </div>
+
+            {/* Transações Recentes - Col Span 4 */}
+            <div className={`lg:col-span-4 ${bgCard} rounded-[1.5rem] border ${borderClass} shadow-sm p-6 flex flex-col`}>
+               <div className="flex justify-between items-center mb-6">
+                  <h3 className={`text-sm font-bold uppercase tracking-wider ${textTitle}`}>Transações</h3>
+               </div>
+               <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[350px]">
+                  {recentTransactions.map(t => (
+                     <div key={t.id} className={`flex justify-between items-center p-3 rounded-xl border ${borderClass} ${bgSubCard}`}>
+                        <div className="flex items-center gap-3 min-w-0">
+                           <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5">
+                              {t.type === 'INCOME' ? <TrendingUp className="w-4 h-4 text-emerald-500"/> : <TrendingDown className="w-4 h-4 text-red-500"/>}
+                           </div>
+                           <div className="min-w-0">
+                              <p className={`font-bold text-xs truncate ${textTitle}`}>{t.description}</p>
+                              <p className={`text-[10px] ${textSub} truncate`}>{new Date(t.date).toLocaleDateString('pt-BR')}</p>
+                           </div>
+                        </div>
+                        <div className={`font-bold text-sm shrink-0 pl-2 ${t.type === 'INCOME' ? 'text-emerald-500' : textTitle}`}>
+                           {t.type === 'INCOME' ? '+' : '-'} {formatCurrency(Number(t.amount))}
+                        </div>
+                     </div>
                   ))}
+                  {recentTransactions.length === 0 && (
+                     <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+                        <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-center">Sem Registros</p>
+                     </div>
+                  )}
                </div>
             </div>
-            <div className="flex-1 min-h-[300px]">
-               <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                     <defs>
-                        <linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#00FF00" stopOpacity={0.3}/>
-                           <stop offset="95%" stopColor="#00FF00" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#333333" stopOpacity={0.5}/>
-                           <stop offset="95%" stopColor="#333333" stopOpacity={0}/>
-                        </linearGradient>
-                     </defs>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1A1A1A" />
-                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#666', fontSize: 12}} dy={10} />
-                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#666', fontSize: 12}} tickFormatter={(val) => `${val/1000}k`} />
-                     <Tooltip 
-                        contentStyle={{ backgroundColor: '#141414', border: '1px solid #2A2A2A', borderRadius: '1rem', color: '#fff' }}
-                        itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-                     />
-                     <Area type="monotone" dataKey="receitas" stroke="#00FF00" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
-                     <Area type="monotone" dataKey="despesas" stroke="#333333" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
-                  </AreaChart>
-               </ResponsiveContainer>
-            </div>
-         </div>
-
-         <div className="glass rounded-[2.5rem] p-8 flex flex-col">
-            <div className="flex justify-between items-center mb-8">
-               <h3 className="text-base font-bold text-white uppercase tracking-widest">Movimentações</h3>
-               <NavLink to="/transactions" className="text-xs font-bold text-primary hover:underline">Ver todas</NavLink>
-            </div>
-            <div className="flex-1 flex flex-col gap-4">
-               {recentTx.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center text-neutral-500 text-sm font-medium">Nenhum registro.</div>
-               ) : (
-                  recentTx.map(t => (
-                     <div key={t.id} className="flex justify-between items-center p-4 bg-dark-bg rounded-2xl border border-dark-border group hover:border-white/10 transition-colors">
-                        <div className="flex items-center gap-4">
-                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'INCOME' ? 'bg-primary/10 text-primary' : 'bg-white/5 text-white'}`}>
-                              {t.type === 'INCOME' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
-                           </div>
-                           <div>
-                              <p className="font-bold text-white text-sm">{t.description}</p>
-                              <div className="flex items-center gap-1 text-[10px] text-neutral-500 font-medium mt-1">
-                                 {t.type === 'INCOME' ? <Monitor className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
-                                 {t.type === 'INCOME' ? 'Painel Web' : 'WhatsApp'}
-                              </div>
-                           </div>
-                        </div>
-                        <div className={`font-black text-sm ${t.type === 'INCOME' ? 'text-primary' : 'text-white'}`}>
-                           {t.type === 'INCOME' ? '+' : '-'}{userCurrency} {Math.abs(Number(t.amount)).toLocaleString(userLocale)}
-                        </div>
-                     </div>
-                  ))
-               )}
-            </div>
-         </div>
+        </div>
       </div>
-
-      {/* Linha 3: Ferramentas Exclusivas */}
-      {!isBusiness && (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         {/* Metas */}
-         <div className="glass rounded-[2rem] p-8 group hover:border-primary/30 transition-colors">
-            <div className="flex items-center justify-between mb-6">
-               <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center"><Target className="w-6 h-6 text-white" /></div>
-               <NavLink to="/goals"><ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-white transition-colors" /></NavLink>
-            </div>
-            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Metas de Vida</h4>
-            {goals.length > 0 ? (
-               <>
-                  <p className="text-xl font-black text-white mb-6">{goals[0].name}</p>
-                  <div className="flex justify-between items-end mb-2">
-                     <span className="text-3xl font-black text-white">{(goals[0].currentValue / goals[0].targetValue * 100).toFixed(0)}%</span>
-                     <span className="text-xs text-neutral-500 font-medium mb-1">{formatMoney(goals[0].currentValue)} / {formatMoney(goals[0].targetValue)}</span>
-                  </div>
-                  <div className="w-full bg-dark-bg h-2 rounded-full overflow-hidden">
-                     <div className="bg-primary h-full" style={{ width: `${(goals[0].currentValue / goals[0].targetValue) * 100}%` }}></div>
-                  </div>
-                  <p className="text-[10px] font-bold text-primary mt-4 uppercase text-center">Foco e Disciplina</p>
-               </>
-            ) : (
-               <p className="text-sm text-neutral-500 mt-4">Nenhuma meta ativa.</p>
-            )}
-         </div>
-
-         {/* Supermercado */}
-         <div className="glass rounded-[2rem] p-8 group hover:border-primary/30 transition-colors">
-            <div className="flex items-center justify-between mb-6">
-               <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center"><ShoppingCart className="w-6 h-6 text-white" /></div>
-               <NavLink to="/mercado"><ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-white transition-colors" /></NavLink>
-            </div>
-            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Supermercado Inteligente</h4>
-            {market.length > 0 ? (
-               <>
-                  <p className="text-xl font-black text-white mb-6">{market[0].productName}</p>
-                  <div className="bg-dark-bg p-4 rounded-2xl border border-dark-border flex justify-between items-center mb-4">
-                     <div>
-                        <p className="text-[10px] text-neutral-500 uppercase font-bold">Melhor Preço</p>
-                        <p className="text-lg font-black text-white">{formatMoney(market[0].bestPrice)}</p>
-                     </div>
-                     <div className="text-right">
-                        <p className="text-[10px] text-neutral-500 uppercase font-bold">Local</p>
-                        <p className="text-sm font-bold text-white">{market[0].establishment}</p>
-                     </div>
-                  </div>
-                  <p className="text-[10px] font-bold text-red-500 mt-4 uppercase flex items-center justify-center gap-1"><TrendingUp className="w-3 h-3"/> +12% vs Última Compra</p>
-               </>
-            ) : (
-               <p className="text-sm text-neutral-500 mt-4">Nenhum produto monitorado.</p>
-            )}
-         </div>
-
-         {/* Garagem */}
-         <div className="glass rounded-[2rem] p-8 group hover:border-primary/30 transition-colors">
-            <div className="flex items-center justify-between mb-6">
-               <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center"><Car className="w-6 h-6 text-white" /></div>
-               <NavLink to="/veiculos"><ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-white transition-colors" /></NavLink>
-            </div>
-            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Garagem Alfred</h4>
-            <p className="text-xl font-black text-white mb-6">Veículo Principal</p>
-            <div className="space-y-3">
-               <div className="flex justify-between items-center bg-dark-bg p-3 rounded-xl border border-dark-border">
-                  <span className="text-xs font-medium text-neutral-400 flex items-center gap-2"><Zap className="w-4 h-4 text-primary"/> Combustível</span>
-                  <span className="text-sm font-bold text-white">{formatMoney(vehicles.filter(v => v.service.toLowerCase().includes('combustivel') || v.service.toLowerCase().includes('gasolina')).reduce((a,b)=>a+b.amount,0))}</span>
-               </div>
-               <div className="flex justify-between items-center bg-dark-bg p-3 rounded-xl border border-dark-border">
-                  <span className="text-xs font-medium text-neutral-400 flex items-center gap-2"><Activity className="w-4 h-4 text-white"/> Manutenção</span>
-                  <span className="text-sm font-bold text-white">{formatMoney(vehicles.filter(v => !v.service.toLowerCase().includes('combustivel') && !v.service.toLowerCase().includes('gasolina')).reduce((a,b)=>a+b.amount,0))}</span>
-               </div>
-            </div>
-         </div>
-      </div>
-      )}
-
-    </div>
+    </Layout>
   );
 }
