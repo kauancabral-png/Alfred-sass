@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String         @map("password_hash")
+  phone         String?        @unique // Telefone para integração com WhatsApp
+  gender        String?        // 'masculino' ou 'feminino' para o Alfred responder certo
+  plan          PlanType       @default(FREE) // FREE, MONTHLY, BIANNUAL, ANNUAL
+  stripeId      String?        @unique // Relacionar com cliente no Stripe
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  profiles      Profile[]
+  subscriptions Subscription[]
+}
+
+model Profile {
+  id          String        @id @default(uuid())
+  type        ProfileType   @default(PERSONAL) // PERSONAL, BUSINESS
+  name        String        @default("Meu Perfil Principal")
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  
+  transactions Transaction[]
+  goals        Goal[]
+  categories   Category[]
+  
+  vehicleMaintenances VehicleMaintenance[]
+  marketComparisons    MarketComparison[]
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  type      TxnType   // INCOME ou EXPENSE
+  profileId String
+  profile   Profile   @relation(fields: [profileId], references: [id])
+  
+  transactions Transaction[]
+
+  createdAt DateTime  @default(now())
+}
+
+model Transaction {
+  id          String    @id @default(uuid())
+  description String
+  amount      Float
+  type        TxnType
+  date        DateTime
+  
+  categoryId  String?
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  
+  profileId   String
+  profile     Profile   @relation(fields: [profileId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Goal {
+  id          String    @id @default(uuid())
+  name        String
+  targetValue Float
+  currentValue Float    @default(0)
+  deadline    DateTime
+  
+  profileId   String
+  profile     Profile   @relation(fields: [profileId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Subscription {
+  id                 String    @id @default(uuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id])
+  stripeSubscriptionId String  @unique
+  status             SubStatus
+  currentPeriodEnd   DateTime
+  
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+enum PlanType {
+  FREE
+  MONTHLY
+  BIANNUAL
+  ANNUAL
+}
+
+enum SubStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum ProfileType {
+  PERSONAL
+  BUSINESS
+}
+
+enum TxnType {
+  INCOME
+  EXPENSE
+}
+
+model VehicleMaintenance {
+  id          String   @id @default(uuid())
+  service     String
+  date        DateTime @default(now())
+  local       String
+  amount      Float
+  status      String   @default("Concluído")
+  reminder    DateTime?
+  
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id])
+}
+
+model MarketComparison {
+  id            String   @id @default(uuid())
+  productName   String
+  bestPrice     Float
+  quantity      Float?   @default(1)
+  establishment String
+  lastPrice     Float?
+  trend         String?  @default("down")
+  
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id])
+}

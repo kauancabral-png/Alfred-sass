@@ -1,0 +1,9 @@
+{
+  "name": "alfred-saas-premium",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

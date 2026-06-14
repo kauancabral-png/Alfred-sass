@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8; 
+}
+
+/* Base Animations */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* TEMA EMPRESARIAL - AZUL / SLATE */
+.business-mode h1, 
+.business-mode .text-slate-800 {
+  color: #1e3a8a !important; /* Blue 900 */
+}
+
+.business-mode .bg-primary {
+  background-color: #2563eb !important; /* Blue 600 */
+}
+
+.business-mode .text-primary {
+  color: #2563eb !important;
+}
+
+.business-mode .border-primary {
+  border-color: #2563eb !important;
+}
+
+.business-mode .bg-primary\/10 {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+.business-mode .bg-emerald-500,
+.business-mode .bg-green-500 {
+  background-color: #3b82f6 !important; /* Corporate Blue */
+}
+
+.business-mode .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.business-mode button.bg-primary:hover {
+  background-color: #1d4ed8 !important;
+}
