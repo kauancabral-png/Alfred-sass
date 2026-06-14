@@ -284,7 +284,6 @@ export default function Dashboard() {
               <button className="btn-ghost flex items-center justify-center" style={{padding: '8px', borderRadius: '50%', width: '36px', height: '36px'}}><ArrowRightLeft className="w-4 h-4" /></button>
               <h1 className="text-3xl md:text-4xl font-black tracking-tighter" style={{color: 'var(--text-primary)'}}>Hello, {userName}</h1>
            </div>
-        </div>
 
            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full md:w-auto">
              <div className="bg-white px-2 py-2 rounded-[2rem] shadow-sm border-2 border-emerald-500/20 flex items-center hover:border-emerald-500 transition-all group">
