@@ -13,6 +13,7 @@ import trackingRoutes from './routes/trackingRoutes';
 import vehicleRoutes from './routes/vehicleRoutes';
 import marketRoutes from './routes/marketRoutes';
 import categoryRoutes from './routes/categoryRoutes';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -125,7 +126,6 @@ app.get('/api/admin/send-mass-email', async (req, res) => {
         
         let successCount = 0;
         
-        const nodemailer = require('nodemailer');
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.SMTP_PORT || '465'),
@@ -141,12 +141,12 @@ app.get('/api/admin/send-mass-email', async (req, res) => {
             for (const user of users) {
                 try {
                     const mailOptions = {
-                        from: \`"Alfred Financeiro" <\${process.env.SMTP_USER}>\`,
+                        from: '"Alfred Financeiro" <' + process.env.SMTP_USER + '>',
                         to: user.email,
-                        subject: \`Aviso Importante: Actualización de Servidores 🚀\`,
-                        html: \`
+                        subject: 'Aviso Importante: Actualización de Servidores 🚀',
+                        html: `
                             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
-                                <h2>¡Hola \${user.name.split(' ')[0]}, todo está bien!</h2>
+                                <h2>¡Hola ${user.name.split(' ')[0]}, todo está bien!</h2>
                                 <p>Estábamos actualizando los servidores, ¡ahora funcionan normalmente!</p>
                                 
                                 <p><strong>Paso 1:</strong> Haz clic en el enlace de inicio de sesión 👉 <a href="https://alfred-saas-premium.vercel.app/login" style="color: #0066cc; font-weight: bold;">https://alfred-saas-premium.vercel.app/login</a></p>
@@ -161,17 +161,17 @@ app.get('/api/admin/send-mass-email', async (req, res) => {
                                 
                                 <p>Si tienes alguna pregunta, contáctanos en <a href="mailto:seualfredapp@gmail.com">seualfredapp@gmail.com</a>. ¡Estaremos encantados de ayudarte! 🎩</p>
                             </div>
-                        \`
+                        `
                     };
                     await transporter.sendMail(mailOptions);
                     successCount++;
                     await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
                 } catch (e) {}
             }
-            console.log(\`Mass email complete. Sent: \${successCount}\`);
+            console.log("Mass email complete. Sent: " + successCount);
         }, 100);
 
-        return res.json({ message: \`Disparo em massa iniciado para \${users.length} clientes em background!\` });
+        return res.json({ message: "Disparo em massa iniciado para " + users.length + " clientes em background!" });
     } catch(e:any) { res.status(500).json({ error: e.message }); }
 });
 
