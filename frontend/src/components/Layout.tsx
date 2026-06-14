@@ -1,216 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
-  ArrowRightLeft, 
-  Target, 
-  PieChart, 
-  Settings, 
-  LogOut,
   Menu,
+  X,
   MessageCircle,
-  Briefcase,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  ShoppingCart,
-  Car,
-  User,
-  AlertTriangle,
-  Layers,
-  Plus,
-  CreditCard,
-  TrendingUp,
-  FileText,
-  BarChart2,
-  Lock
+  Zap,
+  Bot,
+  Eye,
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const profileMode = localStorage.getItem('profileMode') || 'PERSONAL';
-
-  useEffect(() => {
-    const checkAccess = async () => {
-       const token = localStorage.getItem('token');
-       if (!token) { setLoading(false); return; }
-       try {
-          // Auto-detección de URL para evitar errores de Hardcode 🎩
-          let apiUrl = 'https://alfred-backend-8t7n.onrender.com/api';
-          if (window.location.origin.includes('onrender.com')) {
-              apiUrl = window.location.origin + '/api';
-          }
-          const res = await fetch(`${apiUrl}/auth/me`, {
-             headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.status === 403) setIsBlocked(true);
-       } catch (e) {
-          console.error("Erro ao verificar acesso global", e);
-       } finally {
-          setLoading(false);
-       }
-    };
-    checkAccess();
-  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
-  const personalMenu = [
-    { icon: LayoutDashboard, label: 'Visión Estratégica', path: '/dashboard' },
-    { icon: ArrowRightLeft, label: 'Transacciones', path: '/transactions' },
-    { icon: ArrowUpCircle, label: 'Mis Ingresos', path: '/receitas' },
-    { icon: ArrowDownCircle, label: 'Mis Gastos', path: '/despesas' },
-    { icon: Layers, label: 'Categorías', path: '/categorias' },
-    { icon: ShoppingCart, label: 'Supermercado', path: '/mercado' },
-    { icon: Car, label: 'Vehículos', path: '/veiculos' },
-    { icon: AlertTriangle, label: 'Mis Deudas', path: '/dividas' },
-    { icon: Target, label: 'Mis Metas', path: '/goals' },
-    { icon: PieChart, label: 'Gráficos', path: '/reports' },
-    { icon: MessageCircle, label: 'Robot Alfred', path: '/bot' },
-    { icon: Settings, label: 'Configuración', path: '/settings' },
-  ];
-
-  const businessMenu = [
-    { icon: LayoutDashboard, label: 'Panel de Negocios', path: '/dashboard' },
-    { icon: CreditCard, label: 'Gestión de Cuentas y Bancos', path: '/transactions?category=bancos' },
-    { icon: ArrowRightLeft, label: 'Flujo de Caja Real', path: '/transactions?category=flujo' },
-    { icon: TrendingUp, label: 'Estado de Resultados (ER)', path: '/reports?view=er' },
-    { icon: AlertTriangle, label: 'Cuentas por Pagar y Cobrar', path: '/dividas' },
-    { icon: User, label: 'Nómina (RRHH)', path: '/transactions?category=payroll' },
-    { icon: ShoppingCart, label: 'Insumos e Inventario', path: '/mercado' },
-    { icon: Car, label: 'Logística y Flota', path: '/veiculos' },
-    { icon: BarChart2, label: 'Análisis de Planificación', path: '/reports?view=planeacion' },
-    { icon: Target, label: 'Metas Financieras (KPIs)', path: '/goals' },
-  ];
-
-  const menuItems = profileMode === 'BUSINESS' ? businessMenu : personalMenu;
-  const themeClass = profileMode === 'BUSINESS' ? 'bg-slate-900 border-blue-500/20' : 'bg-primary border-primary-light/30';
-  const activeClass = profileMode === 'BUSINESS' ? 'bg-blue-600 text-white' : 'bg-white text-primary';
-
-  if (!loading && isBlocked) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 px-6 text-center font-sans">
-           <div className="w-32 h-32 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-8 shadow-xl"><Lock className="w-16 h-16" /></div>
-           <h2 className="text-5xl font-black text-slate-800 mb-4 tracking-tighter">Área Vip Bloqueada</h2>
-           <p className="text-slate-500 font-bold mb-10 text-xl max-w-lg mx-auto italic">Tu mayordomo detectó que tu plan no está activo. Regulariza ahora para retomar el control.</p>
-           <button onClick={() => window.location.href='/#planos'} className="bg-slate-900 text-white font-black px-12 py-6 rounded-[2.5rem] shadow-2xl hover:scale-105 active:scale-95 transition-all text-xl uppercase tracking-widest font-sans">Activar Acceso</button>
-      </div>
-    );
-  }
-
   return (
-    <div className="app-wrapper flex h-[100dvh] overflow-hidden font-sans">
+    <div className="flex h-[100dvh] overflow-hidden bg-[#F4F7FA] font-sans">
       {/* Mobile Header */}
-      <div className={`md:hidden fixed top-0 w-full z-50 flex items-center justify-between p-4 shadow-md h-16 transition-colors duration-500 header`}>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="absolute left-4 z-10 p-2 -ml-2 text-white">
-          <Menu className="w-8 h-8" />
+      <div className="md:hidden fixed top-0 w-full z-50 flex items-center justify-between p-4 bg-white shadow-sm h-16 transition-colors duration-500">
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          className="z-10 p-2 text-black hover:opacity-80"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
-        <NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-80 transition-opacity z-0 flex items-center justify-center">
-           <img src="/logo-alfred-white.png" alt="Alfred Logo" className="h-10 md:h-12 object-contain" />
+        <NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-80">
+           <img src="/logo-alfred-black.png" alt="Logo" className="h-8 object-contain" />
         </NavLink>
-        <div className="flex items-center gap-2">
-           <button className="header-icon-btn flex items-center justify-center relative">
-              <span className="absolute top-0 right-0 notification-badge flex items-center justify-center">3</span>
-              <Settings className="w-5 h-5" />
-           </button>
-        </div>
       </div>
 
       {/* Sidebar */}
       <aside 
         className={`${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:static inset-y-0 left-0 z-40 sidebar transition-all duration-500 ease-in-out flex flex-col`}
+        } md:translate-x-0 fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col`}
       >
         <div className="hidden md:block">
-          <div className="p-6 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-center">
-            <NavLink to="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-              <span className="sidebar-logo-icon">F</span>
-              <span className="sidebar-logo text-white">Finpath</span>
+          <div className="p-6 flex items-center justify-center mb-4">
+            <NavLink to="/dashboard" className="flex items-center justify-center transition-opacity hover:opacity-80">
+              <img src="/logo-alfred-black.png" alt="Alfred Logo" className="h-14 object-contain drop-shadow-sm" />
             </NavLink>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-2 mt-16 md:mt-0">
-          <div className="text-xs uppercase text-muted font-semibold mb-4 tracking-wider pl-3">Menú Principal</div>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const fullPath = item.path;
-            const currentFull = location.pathname + location.search;
-            const isActive = currentFull === fullPath || (location.pathname === fullPath && !location.search && fullPath.includes('tab=cuentas'));
+        
+        <div className="flex-1 overflow-y-auto py-2 px-4 space-y-1 mt-16 md:mt-0">
+            <div className="text-[11px] uppercase text-gray-400 font-bold mb-4 tracking-wider pl-3 mt-4">Menú Principal</div>
+            {/* Primary Menu */}
+            <NavLink to="/upgrade" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                <Zap className="w-4 h-4" />
+                <span className="text-sm font-medium">Upgrade</span>
+            </NavLink>
+            <NavLink to="/fale-pierre" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Fale com o Pierre</span>
+            </NavLink>
+            <NavLink to="/agentes" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                <Bot className="w-4 h-4" />
+                <span className="text-sm font-medium">Agentes</span>
+            </NavLink>
+            <NavLink to="/vision" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-black transition-colors">
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">Vision</span>
+            </NavLink>
 
-            return (
-              <NavLink 
-                key={item.label} 
-                to={item.path}
-                className={() => 
-                  `nav-item flex items-center ${isActive ? 'active' : ''}`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Icon className="w-5 h-5 nav-icon" />
-                {item.label}
-              </NavLink>
-            );
-          })}
-        </div>
+            <div className="flex items-center gap-2 mt-4 px-3">
+               <button className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center relative bg-white">
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <Settings className="w-5 h-5 text-gray-500" />
+               </button>
+            </div>
 
-        <div className="sidebar-footer flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <div className="user-avatar">S</div>
-             <div className="flex flex-col">
-                <span className="text-sm font-bold text-white">Steven</span>
-                <span className="text-xs text-muted">Pro Plan</span>
-             </div>
-          </div>
-          <button onClick={handleLogout} className="text-muted hover:text-danger transition-colors p-2">
-            <LogOut className="w-5 h-5" />
-          </button>
+            <div className="mt-6 mb-2">
+                <button className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+                    <span>Whatsapp</span>
+                    <ChevronRight className="w-3 h-3" />
+                </button>
+            </div>
+
+            <div className="mb-2">
+                <button className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+                    <span>Recentes</span>
+                    <ChevronDown className="w-3 h-3" />
+                </button>
+            </div>
+
+            <div className="px-3 py-1">
+                <span className="text-xs text-slate-500 font-medium">Últimos 30 dias</span>
+            </div>
+
+            <div className="px-3 py-2 text-sm text-slate-300 truncate hover:text-white cursor-pointer">
+                Pix feitos para Leticia Rodrigu...
+            </div>
+
+            <div className="mt-8 px-3 py-4 text-xs text-slate-600 leading-relaxed">
+                Você chegou ao fim do seu<br/>histórico
+            </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 fade-in main-content relative">
-        <div className="hidden md:flex header items-center justify-between px-8 absolute top-0 w-full z-10">
-           <div className="flex items-center gap-6">
-              <span className="text-white font-bold tracking-tight">Dashboard</span>
-           </div>
-           <div className="flex items-center gap-4">
-              <div className="theme-toggle">
-                 <span className="theme-toggle-btn active flex items-center gap-1"><span className="w-3 h-3 rounded-full border border-current"></span> Light</span>
-                 <span className="theme-toggle-btn flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-current"></span> Dark</span>
-              </div>
-              <button className="header-icon-btn relative flex items-center justify-center">
-                 <span className="absolute top-0 right-0 notification-badge flex items-center justify-center">1</span>
-                 <Settings className="w-4 h-4" />
-              </button>
-           </div>
-        </div>
-        <div className="p-4 md:p-8 max-w-7xl mx-auto md:mt-[60px]">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 md:pt-0 bg-[#0c0c0c]">
+        <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-full">
           {children}
         </div>
       </main>
       
       {/* Mobile Back-drop */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-overlay z-30 md:hidden backdrop-blur-sm" 
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Bottom Navigation para Mobile */}
-      <div className="bottom-nav">
-         <NavLink to="/dashboard" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}><LayoutDashboard className="nav-icon" /><span>Home</span></NavLink>
-         <NavLink to="/transactions" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}><ArrowRightLeft className="nav-icon" /><span>Moves</span></NavLink>
-         <NavLink to="/reports" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}><PieChart className="nav-icon" /><span>Stats</span></NavLink>
-         <NavLink to="/bot" className={({isActive}) => `bottom-nav-item ${isActive ? 'active' : ''}`}><MessageCircle className="nav-icon" /><span>AI</span></NavLink>
-      </div>
+      <div 
+        className={`fixed inset-0 bg-black/80 z-30 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
     </div>
   );
 }

@@ -58,7 +58,7 @@ export default function FilteredReport({ title, subtitle, typeFilter = 'ALL', ke
       if(!window.confirm('Tem certeza que deseja excluir este registro?')) return;
       try {
          const token = localStorage.getItem('token');
-         const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/transactions/${id}`, {
+         const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
          });
@@ -74,7 +74,7 @@ export default function FilteredReport({ title, subtitle, typeFilter = 'ALL', ke
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/transactions?profileId=${profileId}&_t=${new Date().getTime()}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${profileId}&_t=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -98,8 +98,8 @@ export default function FilteredReport({ title, subtitle, typeFilter = 'ALL', ke
     try {
       const token = localStorage.getItem('token');
       const url = editId 
-         ? `https://fincontrol-saas-production.up.railway.app/api/transactions/${editId}`
-         : 'https://fincontrol-saas-production.up.railway.app/api/transactions';
+         ? `https://alfred-backend-8t7n.onrender.com/api/transactions/${editId}`
+         : 'https://alfred-backend-8t7n.onrender.com/api/transactions';
       
       const method = editId ? 'PUT' : 'POST';
 

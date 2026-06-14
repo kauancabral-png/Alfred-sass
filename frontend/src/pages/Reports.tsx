@@ -38,7 +38,7 @@ export default function Reports() {
       try {
         const token = localStorage.getItem('token');
         const profileId = localStorage.getItem('activeProfileId');
-        const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/transactions?profileId=${profileId}`, {
+        const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${profileId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {

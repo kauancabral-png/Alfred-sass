@@ -25,7 +25,7 @@ const AdminPanel: React.FC = () => {
 
     try {
       const isDev = window.location.hostname === 'localhost';
-      const baseUrl = isDev ? 'http://localhost:5000' : 'https://fincontrol-saas-production.up.railway.app';
+      const baseUrl = isDev ? 'http://localhost:5000' : 'https://alfred-backend-8t7n.onrender.com';
       
       const queryParams = new URLSearchParams({
         email: email.trim(),

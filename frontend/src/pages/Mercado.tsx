@@ -42,7 +42,7 @@ export default function Supermercado() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/market?profileId=${profileId}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${profileId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -66,7 +66,7 @@ export default function Supermercado() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch('https://fincontrol-saas-production.up.railway.app/api/market', {
+      const res = await fetch('https://alfred-backend-8t7n.onrender.com/api/market', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ productName, bestPrice: Number(bestPrice), quantity: Number(quantity), establishment, profileId })
@@ -153,7 +153,7 @@ export default function Supermercado() {
                                 try {
                                   const token = localStorage.getItem('token');
                                   const profileId = localStorage.getItem('activeProfileId');
-                                  await fetch(`https://fincontrol-saas-production.up.railway.app/api/market/${prod.id}?profileId=${profileId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+                                  await fetch(`https://alfred-backend-8t7n.onrender.com/api/market/${prod.id}?profileId=${profileId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
                                   fetchData();
                                   toast.success('¡Eliminado! ⚔️');
                                 } catch(e) { toast.error('Falla al eliminar'); }

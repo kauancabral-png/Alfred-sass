@@ -50,7 +50,7 @@ export default function CategoriesHub() {
       // 🔥 AUTO-DISCOVERY DE API
       let envUrl = ((import.meta as any).env.VITE_API_URL || '').replace(/\/$/, '');
       if (!envUrl) {
-          envUrl = window.location.origin.includes('up.railway.app') ? window.location.origin + '/api' : 'https://fincontrol-saas-production.up.railway.app/api';
+          envUrl = window.location.origin.includes('up.railway.app') ? window.location.origin + '/api' : 'https://alfred-backend-8t7n.onrender.com/api';
       }
 
       const currentProfileId = localStorage.getItem('activeProfileId') || undefined;

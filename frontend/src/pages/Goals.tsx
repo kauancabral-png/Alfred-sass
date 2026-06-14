@@ -26,7 +26,7 @@ export default function Goals() {
     setLoading(true);
     try {
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/goals?profileId=${profileId}&_t=${new Date().getTime()}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/goals?profileId=${profileId}&_t=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
@@ -61,8 +61,8 @@ export default function Goals() {
     try {
         const method = editingId ? 'PUT' : 'POST';
         const url = editingId 
-            ? `https://fincontrol-saas-production.up.railway.app/api/goals/${editingId}`
-            : 'https://fincontrol-saas-production.up.railway.app/api/goals';
+            ? `https://alfred-backend-8t7n.onrender.com/api/goals/${editingId}`
+            : 'https://alfred-backend-8t7n.onrender.com/api/goals';
 
         const res = await fetch(url, {
             method,
@@ -93,7 +93,7 @@ export default function Goals() {
   const handleDelete = async (id: string) => {
     if(!window.confirm("Tem certeza que deseja apagar esta meta?")) return;
     try {
-        const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/goals/${id}`, {
+        const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/goals/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });

@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const [currency, setCurrency] = useState('$');
   const [locale, setLocale] = useState('es-MX');
 
-  const [apiUrl, setApiUrl] = useState('https://fincontrol-saas-production.up.railway.app/api');
+  const [apiUrl, setApiUrl] = useState('https://alfred-backend-8t7n.onrender.com/api');
 
   useEffect(() => {
     setName(localStorage.getItem('userName') || 'Usuário Administrador');
@@ -38,8 +38,8 @@ export default function SettingsPage() {
     } else if (window.location.origin.includes('up.railway.app')) {
         setApiUrl(window.location.origin + '/api');
     } else {
-        setApiUrl('https://fincontrol-saas-production.up.railway.app/api');
-        envUrl = 'https://fincontrol-saas-production.up.railway.app/api';
+        setApiUrl('https://alfred-backend-8t7n.onrender.com/api');
+        envUrl = 'https://alfred-backend-8t7n.onrender.com/api';
     }
 
     fetchProfile(envUrl);

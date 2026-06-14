@@ -33,7 +33,7 @@ export default function Transactions() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/transactions?profileId=${profileId}&_t=${new Date().getTime()}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${profileId}&_t=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -51,7 +51,7 @@ export default function Transactions() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/categories?profileId=${profileId}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/categories?profileId=${profileId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) setCategories(await res.json());
@@ -87,7 +87,7 @@ export default function Transactions() {
     if (!confirm('Apagar este lançamento?')) return;
     try {
       const token = localStorage.getItem('token');
-      await fetch(`https://fincontrol-saas-production.up.railway.app/api/transactions/${id}`, {
+      await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -106,8 +106,8 @@ export default function Transactions() {
     try {
       const token = localStorage.getItem('token');
       const url = editId
-        ? `https://fincontrol-saas-production.up.railway.app/api/transactions/${editId}`
-        : 'https://fincontrol-saas-production.up.railway.app/api/transactions';
+        ? `https://alfred-backend-8t7n.onrender.com/api/transactions/${editId}`
+        : 'https://alfred-backend-8t7n.onrender.com/api/transactions';
       const method = editId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -139,7 +139,7 @@ export default function Transactions() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch('https://fincontrol-saas-production.up.railway.app/api/categories', {
+      const res = await fetch('https://alfred-backend-8t7n.onrender.com/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name: newCatName, type: 'EXPENSE', profileId })

@@ -15,7 +15,7 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('https://fincontrol-saas-production.up.railway.app/api/auth/register', {
+      const response = await fetch('https://alfred-backend-8t7n.onrender.com/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email: email.toLowerCase().trim(), password, whatsappNumber: phone })

@@ -41,7 +41,7 @@ export default function Veiculos() {
     try {
       const token = localStorage.getItem('token');
       const profileId = localStorage.getItem('activeProfileId');
-      const res = await fetch(`https://fincontrol-saas-production.up.railway.app/api/vehicles?profileId=${profileId}`, {
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/vehicles?profileId=${profileId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -64,7 +64,7 @@ export default function Veiculos() {
     
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://fincontrol-saas-production.up.railway.app/api/vehicles', {
+      const res = await fetch('https://alfred-backend-8t7n.onrender.com/api/vehicles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ 
@@ -140,7 +140,7 @@ export default function Veiculos() {
                                if(!confirm('¿Eliminar este registro?')) return;
                                try {
                                  const token = localStorage.getItem('token');
-                                 await fetch(`https://fincontrol-saas-production.up.railway.app/api/vehicles/${item.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+                                 await fetch(`https://alfred-backend-8t7n.onrender.com/api/vehicles/${item.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
                                  fetchData();
                                  toast.success('¡Registro Eliminado! 🏎️');
                                } catch(e) { toast.error('Error al eliminar'); }

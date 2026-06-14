@@ -8,7 +8,7 @@ import confetti from 'canvas-confetti';
 export default function Bot() {
   const [phoneInput, setPhoneInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiUrl, setApiUrl] = useState('https://fincontrol-saas-production.up.railway.app/api');
+  const [apiUrl, setApiUrl] = useState('https://alfred-backend-8t7n.onrender.com/api');
 
   React.useEffect(() => {
     // 🔥 AUTO-DISCOVERY DE API
@@ -18,8 +18,8 @@ export default function Bot() {
     } else if (window.location.origin.includes('up.railway.app')) {
         setApiUrl(window.location.origin + '/api');
     } else {
-        setApiUrl('https://fincontrol-saas-production.up.railway.app/api');
-        envUrl = 'https://fincontrol-saas-production.up.railway.app/api';
+        setApiUrl('https://alfred-backend-8t7n.onrender.com/api');
+        envUrl = 'https://alfred-backend-8t7n.onrender.com/api';
     }
 
     // FUNÇÃO REFORÇADA: O Alfred busca no cofre toda vez que entra na sala! 🏹🎩
