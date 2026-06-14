@@ -10,20 +10,23 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .glass {
+    @apply bg-dark-card/60 backdrop-blur-xl border border-white/5;
+  }
 }
 
 body {
-  background-color: #F4F7FA;
+  background-color: #080808;
   font-family: 'Inter', sans-serif;
-  color: #1F2937; /* slate-800 */
+  color: #FFFFFF;
 }
 
-/* Light Theme Card */
+/* Dark Theme Card */
 .hospital-card {
-  background-color: #FFFFFF;
+  background-color: #141414;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2A2A2A;
   padding: 24px;
 }
 

@@ -13,9 +13,14 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#000000', // Preto Brilhante / Absoluto
-          light: '#1C1C1E',   // Preto Grafite Apple
-          dark: '#000000',    // Preto Puro
+          DEFAULT: '#00FF00', // Verde Neon Principal
+          light: '#33FF33',   
+          dark: '#00CC00',    
+        },
+        dark: {
+          bg: '#080808', // Fundo profundo
+          card: '#141414', // Cards
+          border: '#2A2A2A',
         }
       }
     },
