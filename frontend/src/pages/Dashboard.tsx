@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import { 
   ArrowUp, ArrowDown, Bell, Plus, Minus, Mic, MessageCircle, FileText, Download,
   ShoppingCart, Car, Target, TrendingUp, TrendingDown, Info, ChevronDown, Activity, 
-  MapPin, CheckCircle, Settings
+  Settings, CheckCircle, Briefcase, FileSignature, Wallet, DollarSign, Layers
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import toast from 'react-hot-toast';
+
+// Cores para o gráfico de rosca (Top Despesas)
+const COLORS = ['#ef4444', '#f97316', '#3b82f6', '#8b5cf6', '#14b8a6', '#64748b'];
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -63,39 +66,124 @@ export default function Dashboard() {
      if(profileMode === mode) return;
      setProfileMode(mode);
      localStorage.setItem('profileMode', mode);
-     // Trigger globally so layout updates its sidebar selection
      window.dispatchEvent(new Event('profileModeChanged'));
   };
 
-  const formatMoney = (val: number) => `${userCurrency} ${val.toLocaleString(userLocale, { minimumFractionDigits: 2 })}`;
+  const formatMoney = (val: number) => `${userCurrency} ${Math.abs(val).toLocaleString(userLocale, { minimumFractionDigits: 2 })}`;
+  const isBusiness = profileMode === 'business';
 
-  // Cálculos Básicos
-  const incomes = transactions.filter(t => t.type === 'INCOME');
-  const expenses = transactions.filter(t => t.type === 'EXPENSE');
+  // ---- CÁLCULOS DINÂMICOS GERAIS ----
+  const now = new Date();
+  
+  // Transações Realizadas (passado/presente ou status PAID/REALIZED)
+  const realizedTx = transactions.filter(t => {
+     if (t.status) return t.status !== 'PENDING';
+     return new Date(t.date) <= now;
+  });
+
+  // Transações Pendentes (Futuro ou status PENDING)
+  const pendingTx = transactions.filter(t => {
+     if (t.status) return t.status === 'PENDING';
+     return new Date(t.date) > now;
+  });
+
+  const incomes = realizedTx.filter(t => t.type === 'INCOME');
+  const expenses = realizedTx.filter(t => t.type === 'EXPENSE');
   
   const totalIncome = incomes.reduce((acc, t) => acc + Number(t.amount), 0);
   const totalExpense = Math.abs(expenses.reduce((acc, t) => acc + Number(t.amount), 0));
   const balance = totalIncome - totalExpense;
-  const savings = totalIncome > 0 ? (balance > 0 ? balance : 0) : 0;
-  const savingsGoalProgress = totalIncome > 0 ? Math.min(100, Math.round((savings / (totalIncome * 0.2)) * 100)) : 0; // Exemplo: meta de guardar 20%
 
-  // Gráfico de Fluxo
-  const chartData = useMemo(() => {
+  // ---- CÁLCULOS ESPECÍFICOS PESSOAL ----
+  const savings = balance > 0 ? balance : 0;
+  const savingsGoalProgress = totalIncome > 0 ? Math.min(100, Math.round((savings / (totalIncome * 0.2)) * 100)) : 0;
+
+  const personalChartData = useMemo(() => {
     const data: Record<string, { name: string, Receitas: number, Despesas: number }> = {};
-    transactions.forEach(t => {
+    realizedTx.forEach(t => {
       const date = new Date(t.date);
       const day = date.toLocaleDateString(userLocale, { day: '2-digit', month: '2-digit' });
       if (!data[day]) data[day] = { name: day, Receitas: 0, Despesas: 0 };
       if (t.type === 'INCOME') data[day].Receitas += Number(t.amount);
       else data[day].Despesas += Math.abs(Number(t.amount));
     });
-    return Object.values(data).reverse().slice(-14); // Últimos 14 dias
-  }, [transactions, userLocale]);
+    return Object.values(data).sort((a:any, b:any) => a.name.localeCompare(b.name)).slice(-14);
+  }, [realizedTx, userLocale]);
 
-  const recentTx = transactions.slice(0, 5);
+  // ---- CÁLCULOS ESPECÍFICOS EMPRESARIAL (DRE & CONTAS) ----
+  
+  // Contas a Receber/Pagar
+  const billsToReceive = pendingTx.filter(t => t.type === 'INCOME');
+  const billsToPay = pendingTx.filter(t => t.type === 'EXPENSE');
+  
+  const totalToReceive = billsToReceive.reduce((acc, t) => acc + Number(t.amount), 0);
+  const totalToPay = Math.abs(billsToPay.reduce((acc, t) => acc + Number(t.amount), 0));
 
+  // DRE Inteligente
+  const dre = useMemo(() => {
+     let deducoes = 0;
+     let custos = 0;
+     let despesasOps = 0;
+
+     expenses.forEach(t => {
+        const cat = (t.category?.name || '').toLowerCase();
+        const amt = Math.abs(Number(t.amount));
+        if (cat.includes('imposto') || cat.includes('taxa') || cat.includes('deducao') || cat.includes('devolu')) {
+           deducoes += amt;
+        } else if (cat.includes('custo') || cat.includes('fornecedor') || cat.includes('estoque') || cat.includes('insumo') || cat.includes('mercadoria') || cat.includes('frete')) {
+           custos += amt;
+        } else {
+           despesasOps += amt;
+        }
+     });
+
+     const receitaLiquida = totalIncome - deducoes;
+     const lucroBruto = receitaLiquida - custos;
+     const lucroLiquido = lucroBruto - despesasOps;
+     const margem = totalIncome > 0 ? (lucroLiquido / totalIncome) * 100 : 0;
+
+     return { receitaBruta: totalIncome, deducoes, receitaLiquida, custos, despesasOps, lucroBruto, lucroLiquido, margem };
+  }, [expenses, totalIncome]);
+
+  // Top Despesas (Pie Chart)
+  const topExpensesData = useMemo(() => {
+      const groups: Record<string, number> = {};
+      expenses.forEach(t => {
+         const cat = t.category?.name || 'Outros';
+         groups[cat] = (groups[cat] || 0) + Math.abs(Number(t.amount));
+      });
+      const sorted = Object.entries(groups).sort((a,b)=>b[1]-a[1]);
+      const top = sorted.slice(0, 4).map(([name, value]) => ({ name, value }));
+      const others = sorted.slice(4).reduce((acc, [, val]) => acc + val, 0);
+      if(others > 0) top.push({ name: 'Outros', value: others });
+      return top;
+  }, [expenses]);
+
+  // Gráfico Empresarial (3 linhas: Entradas, Saídas, Saldo Acumulado)
+  const businessChartData = useMemo(() => {
+     const data: Record<string, { dateObj: Date, name: string, Entradas: number, Saidas: number, Saldo: number }> = {};
+     realizedTx.forEach(t => {
+       const d = new Date(t.date);
+       const day = d.toLocaleDateString(userLocale, { day: '2-digit', month: '2-digit' });
+       if (!data[day]) data[day] = { dateObj: d, name: day, Entradas: 0, Saidas: 0, Saldo: 0 };
+       if (t.type === 'INCOME') data[day].Entradas += Number(t.amount);
+       else data[day].Saidas += Math.abs(Number(t.amount));
+     });
+     const sortedList = Object.values(data).sort((a,b) => a.dateObj.getTime() - b.dateObj.getTime()).slice(-14);
+     
+     let accumulated = 0; // Ideally should start from previous balance, assuming 0 for sparkline scale
+     sortedList.forEach(item => {
+        accumulated += (item.Entradas - item.Saidas);
+        item.Saldo = accumulated;
+     });
+     return sortedList;
+  }, [realizedTx, userLocale]);
+
+
+  const recentTx = transactions.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+
+  // IA Simples Baseada em Regras
   const renderInsights = () => {
-      // IA Simples Baseada em Regras para gerar insights
       const insights = [];
       if (totalExpense > 0) {
          insights.push({ icon: ShoppingCart, text: `Seus gastos totais representam ${((totalExpense/totalIncome)*100 || 0).toFixed(0)}% da sua receita este mês.`, color: 'text-green-500', bg: 'bg-green-50' });
@@ -110,52 +198,36 @@ export default function Dashboard() {
          insights.push({ icon: Target, text: `Você está a ${pct}% da sua meta de ${goal.name}.`, color: 'text-purple-500', bg: 'bg-purple-50' });
       }
       if (insights.length === 0) {
-         insights.push({ icon: CheckCircle, text: `Tudo tranquilo por aqui. Continue registrando seus gastos.`, color: 'text-blue-500', bg: 'bg-blue-50' });
+         insights.push({ icon: CheckCircle, text: `Tudo tranquilo por aqui. Continue registrando seus lançamentos.`, color: 'text-blue-500', bg: 'bg-blue-50' });
       }
       return insights;
   };
 
-  return (
-    <Layout>
-      <div className="animate-in fade-in duration-500 font-sans pb-20">
-        
-        {/* CABEÇALHO */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-           <div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                 Olá, {userName}! <span className="text-2xl">👋</span>
-              </h1>
-              <p className="text-gray-500 font-medium text-sm mt-1">Seu mordomo financeiro está organizando suas finanças.</p>
-           </div>
-
-           <div className="flex items-center gap-4 bg-white p-2 rounded-full border border-gray-100 shadow-sm">
-              {/* Seletor de Perfil */}
-              <div className="flex items-center bg-gray-50 rounded-full px-1 py-1 mr-2 border border-gray-100">
-                 <button 
-                    onClick={() => toggleProfile('personal')}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${profileMode === 'personal' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-                 >
-                    Pessoal
-                 </button>
-                 <button 
-                    onClick={() => toggleProfile('business')}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${profileMode === 'business' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-                 >
-                    Empresarial
-                 </button>
+  // ----------------------------------------------------
+  // SKELETON LOADING
+  // ----------------------------------------------------
+  if (loading) {
+     return (
+        <Layout>
+           <div className="animate-pulse flex flex-col gap-8 pb-20">
+              <div className="h-12 bg-gray-200 rounded-xl w-1/3 mb-4"></div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                 {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-200 rounded-[1.5rem]"></div>)}
               </div>
-
-              {/* Notificações */}
-              <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors">
-                 <Bell className="w-5 h-5 text-gray-600" />
-                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-              </button>
-
-              {/* Avatar */}
-              <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full border border-gray-200" />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <div className="lg:col-span-2 h-[400px] bg-gray-200 rounded-[1.5rem]"></div>
+                 <div className="h-[400px] bg-gray-200 rounded-[1.5rem]"></div>
+              </div>
            </div>
-        </div>
+        </Layout>
+     );
+  }
 
+  // ====================================================
+  // VIEW: PESSOAL
+  // ====================================================
+  const renderPersonal = () => (
+     <>
         {/* LINHA 1: CARDS DE RESUMO */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
            {/* Saldo Atual */}
@@ -167,11 +239,10 @@ export default function Dashboard() {
                  </div>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(balance)}</h2>
                  <p className="text-[11px] font-bold text-green-500 flex items-center gap-1 mt-1">
-                    <ArrowUp className="w-3 h-3" /> 18% <span className="text-gray-400 font-medium">comparado ao mês passado</span>
+                    <ArrowUp className="w-3 h-3" /> Atualizado <span className="text-gray-400 font-medium">hoje</span>
                  </p>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
-                 {/* Sparkline Simulada com SVG básico */}
                  <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full text-green-500" fill="currentColor">
                     <path d="M0,30 L0,15 Q10,5 20,15 T40,15 T60,10 T80,20 T100,5 L100,30 Z" />
                  </svg>
@@ -186,11 +257,8 @@ export default function Dashboard() {
               <div>
                  <span className="text-sm font-bold text-gray-500 mb-2 block">Receitas do Mês</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(totalIncome)}</h2>
-                 <p className="text-xs text-gray-400 font-medium mt-1">{incomes.length} entradas</p>
+                 <p className="text-xs text-gray-400 font-medium mt-1">{incomes.length} entradas registradas</p>
               </div>
-              <p className="text-[11px] font-bold text-green-500 flex items-center gap-1 mt-1">
-                 <ArrowUp className="w-3 h-3" /> 12% <span className="text-gray-400 font-medium">comparado ao mês passado</span>
-              </p>
            </div>
 
            {/* Despesas */}
@@ -201,11 +269,8 @@ export default function Dashboard() {
               <div>
                  <span className="text-sm font-bold text-gray-500 mb-2 block">Despesas do Mês</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(totalExpense)}</h2>
-                 <p className="text-xs text-gray-400 font-medium mt-1">{expenses.length} gastos</p>
+                 <p className="text-xs text-gray-400 font-medium mt-1">{expenses.length} gastos contabilizados</p>
               </div>
-              <p className="text-[11px] font-bold text-red-500 flex items-center gap-1 mt-1">
-                 <ArrowDown className="w-3 h-3" /> 8% <span className="text-gray-400 font-medium">comparado ao mês passado</span>
-              </p>
            </div>
 
            {/* Economia */}
@@ -219,7 +284,7 @@ export default function Dashboard() {
               </div>
               <div className="mt-2">
                  <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 mb-1">
-                    <span>Meta atingida: {savingsGoalProgress}%</span>
+                    <span>Meta de proteção atingida: {savingsGoalProgress}%</span>
                  </div>
                  <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                     <div className="bg-purple-500 h-full rounded-full" style={{ width: `${savingsGoalProgress}%` }}></div>
@@ -230,7 +295,6 @@ export default function Dashboard() {
 
         {/* LINHA 2: GRÁFICO E TRANSAÇÕES */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-           {/* Fluxo de Caixa (Ocupa 65% em telas grandes) */}
            <div className="lg:col-span-2 bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
               <div className="flex justify-between items-center mb-8">
                  <h3 className="text-lg font-black text-gray-900">Fluxo de Caixa</h3>
@@ -240,13 +304,13 @@ export default function Dashboard() {
                        <span className="flex items-center gap-1 text-xs font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Despesas</span>
                     </div>
                     <button className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                       Últimos 30 dias <ChevronDown className="w-3 h-3" />
+                       Últimos 14 dias <ChevronDown className="w-3 h-3" />
                     </button>
                  </div>
               </div>
               <div className="flex-1 w-full relative">
                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={personalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                        <defs>
                           <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
                              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.1}/>
@@ -260,10 +324,7 @@ export default function Dashboard() {
                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} dy={10} />
                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `R$ ${val/1000}k`} />
-                       <Tooltip 
-                          contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
-                          labelStyle={{ color: '#64748b', marginBottom: '4px' }}
-                       />
+                       <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }} labelStyle={{ color: '#64748b', marginBottom: '4px' }} />
                        <Area type="monotone" dataKey="Receitas" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorRec)" />
                        <Area type="monotone" dataKey="Despesas" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorDes)" />
                     </AreaChart>
@@ -271,7 +332,6 @@ export default function Dashboard() {
               </div>
            </div>
 
-           {/* Últimas Movimentações (35%) */}
            <div className="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col">
               <div className="flex justify-between items-center mb-6">
                  <h3 className="text-lg font-black text-gray-900">Últimas Movimentações</h3>
@@ -294,9 +354,9 @@ export default function Dashboard() {
                           </div>
                           <div className="text-right">
                              <p className={`font-black text-sm ${t.type === 'INCOME' ? 'text-green-600' : 'text-red-500'}`}>
-                                {t.type === 'INCOME' ? '' : ''}{formatMoney(Math.abs(Number(t.amount)))}
+                                {t.type === 'INCOME' ? '+' : '-'}{formatMoney(Math.abs(Number(t.amount)))}
                              </p>
-                             <p className="text-[10px] text-gray-400 font-medium">Painel Web</p>
+                             <p className="text-[10px] text-gray-400 font-medium">{new Date(t.date).toLocaleDateString()}</p>
                           </div>
                        </div>
                     ))
@@ -305,10 +365,9 @@ export default function Dashboard() {
            </div>
         </div>
 
-        {/* LINHA 3: RECURSOS EXCLUSIVOS ALFRED */}
+        {/* LINHA 3: RECURSOS PESSOAIS EXCLUSIVOS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
            
-           {/* Metas de Vida */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-4">
                  <h4 className="text-sm font-black text-gray-900">Metas de Vida</h4>
@@ -328,7 +387,6 @@ export default function Dashboard() {
                           </div>
                           <span className="text-[10px] font-bold text-gray-700">{((goals[0].currentValue / goals[0].targetValue) * 100).toFixed(0)}%</span>
                        </div>
-                       <p className="text-[9px] text-gray-400 mt-2">Você alcançará sua meta em 3 meses.</p>
                     </div>
                  </div>
               ) : (
@@ -336,7 +394,6 @@ export default function Dashboard() {
               )}
            </div>
 
-           {/* Supermercado Inteligente */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-4">
                  <h4 className="text-sm font-black text-gray-900">Supermercado</h4>
@@ -349,9 +406,8 @@ export default function Dashboard() {
                     </div>
                     <div>
                        <p className="font-bold text-gray-900 text-sm mb-1">{market[0].productName}</p>
-                       <p className="text-xs text-gray-500 font-medium mb-1">Melhor preço: <span className="font-black text-gray-900">{formatMoney(market[0].bestPrice)}</span></p>
+                       <p className="text-xs text-gray-500 font-medium mb-1">Melhor: <span className="font-black text-gray-900">{formatMoney(market[0].bestPrice)}</span></p>
                        <p className="text-[10px] text-gray-400 font-medium mb-2">Local: <span className="font-bold text-gray-600">{market[0].establishment}</span></p>
-                       <p className="text-[10px] font-bold text-red-500 flex items-center gap-1"><ArrowUp className="w-3 h-3"/> 12% <span className="text-gray-400 font-normal">desde a última compra</span></p>
                     </div>
                  </div>
               ) : (
@@ -359,11 +415,10 @@ export default function Dashboard() {
               )}
            </div>
 
-           {/* Garagem Alfred */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-4">
                  <h4 className="text-sm font-black text-gray-900">Garagem Alfred</h4>
-                 <NavLink to="/veiculos" className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver detalhes</NavLink>
+                 <NavLink to="/veiculos" className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Detalhes</NavLink>
               </div>
               <div className="flex items-start gap-4">
                  <div className="w-16 h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
@@ -371,22 +426,18 @@ export default function Dashboard() {
                  </div>
                  <div className="flex-1">
                     <p className="font-bold text-gray-900 text-sm mb-1">Veículo Principal</p>
-                    <p className="text-xs text-gray-500 font-medium mb-1">Gasto mensal: <span className="font-black text-gray-900">{formatMoney(vehicles.reduce((a,b)=>a+b.amount,0))}</span></p>
-                    <p className="text-[10px] text-gray-400 mb-3">Próxima revisão: 15/06/2026</p>
-                    
-                    <div className="flex gap-2">
-                       <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center" title="Combustível"><Activity className="w-3 h-3 text-gray-500" /></div>
-                       <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center" title="Manutenção"><Settings className="w-3 h-3 text-gray-500" /></div>
-                       <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center" title="Documentos"><FileText className="w-3 h-3 text-gray-500" /></div>
+                    <p className="text-xs text-gray-500 font-medium mb-1">Total: <span className="font-black text-gray-900">{formatMoney(vehicles.reduce((a,b)=>a+b.amount,0))}</span></p>
+                    <div className="flex gap-2 mt-2">
+                       <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center"><Activity className="w-3 h-3 text-gray-500" /></div>
+                       <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center"><Settings className="w-3 h-3 text-gray-500" /></div>
                     </div>
                  </div>
               </div>
            </div>
 
-           {/* Resumo Inteligente IA */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-4">
-                 <h4 className="text-sm font-black text-gray-900">Resumo Inteligente</h4>
+                 <h4 className="text-sm font-black text-gray-900">Resumo IA</h4>
                  <button className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver todos</button>
               </div>
               <div className="space-y-3 flex-1 overflow-y-auto pr-1">
@@ -400,26 +451,294 @@ export default function Dashboard() {
                  ))}
               </div>
            </div>
+        </div>
+     </>
+  );
 
+  // ====================================================
+  // VIEW: EMPRESARIAL
+  // ====================================================
+  const renderBusiness = () => (
+     <>
+        {/* LINHA 1: CARDS CORPORATIVOS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+           {/* Faturamento Bruto */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[160px] relative">
+              <div className="absolute top-6 right-6 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                 <ArrowUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Faturamento Bruto</span>
+                 <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.receitaBruta)}</h2>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
+                 <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full text-blue-500" fill="currentColor">
+                    <path d="M0,30 L0,15 Q10,5 20,15 T40,15 T60,10 T80,20 T100,5 L100,30 Z" />
+                 </svg>
+              </div>
+           </div>
+
+           {/* Despesas Operacionais */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[160px] relative">
+              <div className="absolute top-6 right-6 w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
+                 <ArrowDown className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Despesas Operacionais</span>
+                 <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.despesasOps)}</h2>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
+                 <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full text-red-500" fill="currentColor">
+                    <path d="M0,15 L10,15 L20,25 L30,15 L40,15 L50,15 L60,10 L70,20 L80,5 L100,20 L100,30 L0,30 Z" />
+                 </svg>
+              </div>
+           </div>
+
+           {/* Lucro Líquido */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[160px] relative">
+              <div className="absolute top-6 right-6 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
+                 <ArrowUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Lucro Líquido</span>
+                 <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.lucroLiquido)}</h2>
+              </div>
+              <p className="text-[11px] font-bold text-green-500 flex items-center gap-1 mt-1">
+                 <ArrowUp className="w-3 h-3" /> Gerado das operações
+              </p>
+           </div>
+
+           {/* Margem de Lucro */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[160px] relative">
+              <div className="absolute top-6 right-6 w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30">
+                 <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Margem de Lucro</span>
+                 <h2 className="text-2xl font-black text-gray-900">{dre.margem.toFixed(2)}%</h2>
+              </div>
+              <div className="mt-2">
+                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div className="bg-purple-500 h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, dre.margem))}%` }}></div>
+                 </div>
+              </div>
+           </div>
         </div>
 
-        {/* RODAPÉ: AÇÕES RÁPIDAS */}
-        <div>
+        {/* LINHA 2: FLUXO DE CAIXA EMPRESARIAL & CONTAS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+           {/* Fluxo de Caixa Empresarial */}
+           <div className="lg:col-span-2 bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
+              <div className="flex justify-between items-center mb-8">
+                 <h3 className="text-lg font-black text-gray-900">Fluxo de Caixa Empresarial</h3>
+                 <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-3 mr-4">
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Entradas</span>
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Saídas</span>
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Saldo</span>
+                    </div>
+                    <button className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                       Últimos 14 dias <ChevronDown className="w-3 h-3" />
+                    </button>
+                 </div>
+              </div>
+              <div className="flex-1 w-full relative">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={businessChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} dy={10} />
+                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `R$ ${val/1000}k`} />
+                       <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
+                       <Line type="monotone" dataKey="Entradas" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                       <Line type="monotone" dataKey="Saidas" stroke="#ef4444" strokeWidth={3} dot={false} />
+                       <Line type="monotone" dataKey="Saldo" stroke="#8b5cf6" strokeWidth={3} dot={false} />
+                    </LineChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
+
+           {/* Contas a Receber e Pagar */}
+           <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex-1">
+                 <div className="flex justify-between items-start mb-6">
+                    <div>
+                       <h3 className="text-sm font-black text-gray-900">Contas a Receber</h3>
+                       <p className="text-[11px] text-gray-500 font-medium">Total a receber (Previsto)</p>
+                    </div>
+                    <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md">{billsToReceive.length} títulos</span>
+                 </div>
+                 <h2 className="text-2xl font-black text-gray-900 mb-4">{formatMoney(totalToReceive)}</h2>
+                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden mb-2">
+                    <div className="bg-blue-500 h-full rounded-full" style={{ width: '45%' }}></div>
+                 </div>
+                 <p className="text-[10px] text-gray-400 font-medium text-right">A vencer próximos 7 dias</p>
+              </div>
+
+              <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex-1">
+                 <div className="flex justify-between items-start mb-6">
+                    <div>
+                       <h3 className="text-sm font-black text-gray-900">Contas a Pagar</h3>
+                       <p className="text-[11px] text-gray-500 font-medium">Total a pagar (Aberto)</p>
+                    </div>
+                    <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-md">{billsToPay.length} títulos</span>
+                 </div>
+                 <h2 className="text-2xl font-black text-gray-900 mb-4">{formatMoney(totalToPay)}</h2>
+                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden mb-2">
+                    <div className="bg-red-500 h-full rounded-full" style={{ width: '70%' }}></div>
+                 </div>
+                 <p className="text-[10px] text-gray-400 font-medium text-right">A vencer próximos 7 dias</p>
+              </div>
+           </div>
+        </div>
+
+        {/* LINHA 3: DRE, TOP DESPESAS, ULTIMAS TRANSAÇÕES */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+           
+           {/* DRE Inteligente */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-center mb-6">
+                 <h4 className="text-sm font-black text-gray-900">DRE Resumido</h4>
+                 <NavLink to="/reports" className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver completo</NavLink>
+              </div>
+              <div className="space-y-3 flex-1 text-sm">
+                 <div className="flex justify-between"><span className="text-gray-500 font-medium">Receita Bruta</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaBruta)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Deduções/Impostos</span><span className="text-red-500">-{formatMoney(dre.deducoes)}</span></div>
+                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Receita Líquida</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaLiquida)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Custos/Produtos</span><span className="text-red-500">-{formatMoney(dre.custos)}</span></div>
+                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Lucro Bruto</span><span className="font-bold text-gray-900">{formatMoney(dre.lucroBruto)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Despesas Ops.</span><span className="text-red-500">-{formatMoney(dre.despesasOps)}</span></div>
+                 <div className="flex justify-between pt-3 mt-1 border-t-2 border-gray-100"><span className="text-gray-900 font-black">LUCRO LÍQUIDO</span><span className="font-black text-green-600">{formatMoney(dre.lucroLiquido)}</span></div>
+              </div>
+           </div>
+
+           {/* Top Despesas */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col items-center hover:shadow-md transition-shadow relative">
+              <div className="w-full flex justify-between items-center mb-2">
+                 <h4 className="text-sm font-black text-gray-900">Top Despesas</h4>
+              </div>
+              {topExpensesData.length > 0 ? (
+                 <>
+                    <div className="h-40 w-full mb-4">
+                       <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                             <Pie data={topExpensesData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value" stroke="none">
+                                {topExpensesData.map((entry, index) => (
+                                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                             </Pie>
+                             <Tooltip contentStyle={{ borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                          </PieChart>
+                       </ResponsiveContainer>
+                    </div>
+                    <div className="w-full space-y-2 overflow-y-auto max-h-24 pr-1">
+                       {topExpensesData.map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-[11px]">
+                             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div><span className="font-medium text-gray-600 truncate max-w-[90px]">{item.name}</span></div>
+                             <div className="flex items-center gap-2"><span className="text-gray-400">{((item.value/totalExpense)*100).toFixed(0)}%</span><span className="font-bold text-gray-900">{formatMoney(item.value)}</span></div>
+                          </div>
+                       ))}
+                    </div>
+                 </>
+              ) : (
+                 <div className="flex-1 flex items-center justify-center text-sm font-medium text-gray-400">Sem dados suficientes.</div>
+              )}
+           </div>
+
+           {/* Últimas Movimentações Empresariais */}
+           <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-center mb-6">
+                 <h4 className="text-sm font-black text-gray-900">Movimentações</h4>
+                 <NavLink to="/transactions" className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver todas</NavLink>
+              </div>
+              <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                 {recentTx.length === 0 ? (
+                    <div className="text-center text-gray-400 text-sm font-medium mt-6">Nenhum registro.</div>
+                 ) : (
+                    recentTx.slice(0,5).map(t => (
+                       <div key={t.id} className="flex justify-between items-center text-[11px]">
+                          <div className="flex items-center gap-3">
+                             <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${t.type === 'INCOME' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
+                                {t.type === 'INCOME' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                             </div>
+                             <div>
+                                <p className="font-bold text-gray-900 truncate max-w-[100px]">{t.description}</p>
+                                <p className="text-gray-500">{t.type === 'INCOME' ? 'Receita' : 'Despesa'}</p>
+                             </div>
+                          </div>
+                          <div className="text-right">
+                             <p className={`font-black ${t.type === 'INCOME' ? 'text-green-600' : 'text-red-500'}`}>
+                                {t.type === 'INCOME' ? '' : '-'}{formatMoney(Math.abs(Number(t.amount)))}
+                             </p>
+                             <p className="text-gray-400">{new Date(t.date).toLocaleDateString()}</p>
+                          </div>
+                       </div>
+                    ))
+                 )}
+              </div>
+           </div>
+
+        </div>
+     </>
+  );
+
+  return (
+    <Layout>
+      <div className="animate-in fade-in duration-500 font-sans pb-20">
+        
+        {/* CABEÇALHO COMPARTILHADO */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+           <div>
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                 Olá, {userName}! <span className="text-2xl">👋</span>
+              </h1>
+              <p className="text-gray-500 font-medium text-sm mt-1">Seu mordomo financeiro está organizando suas finanças.</p>
+           </div>
+
+           <div className="flex items-center gap-4 bg-white p-2 rounded-full border border-gray-100 shadow-sm">
+              <div className="flex items-center bg-gray-50 rounded-full px-1 py-1 mr-2 border border-gray-100">
+                 <button 
+                    onClick={() => toggleProfile('personal')}
+                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${!isBusiness ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
+                 >
+                    Pessoal
+                 </button>
+                 <button 
+                    onClick={() => toggleProfile('business')}
+                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${isBusiness ? 'bg-white text-blue-600 shadow-sm border border-blue-100' : 'text-gray-400 hover:text-gray-700'}`}
+                 >
+                    Empresarial
+                 </button>
+              </div>
+
+              <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors">
+                 <Bell className="w-5 h-5 text-gray-600" />
+                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              </button>
+
+              <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full border border-gray-200" />
+           </div>
+        </div>
+
+        {/* RENDERIZAÇÃO CONDICIONAL */}
+        {isBusiness ? renderBusiness() : renderPersonal()}
+
+        {/* RODAPÉ COMPARTILHADO: AÇÕES RÁPIDAS */}
+        <div className="pt-4 border-t border-gray-100">
            <h4 className="text-sm font-black text-gray-900 mb-4">Ações Rápidas</h4>
            <div className="flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100 hover:bg-green-100 transition-colors">
-                 <Plus className="w-4 h-4" /> Registrar Receita
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors">
+                 <Plus className="w-4 h-4" /> Nova Receita
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition-colors">
-                 <Minus className="w-4 h-4" /> Registrar Despesa
+                 <Minus className="w-4 h-4" /> Nova Despesa
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold border border-purple-100 hover:bg-purple-100 transition-colors">
                  <Mic className="w-4 h-4" /> Enviar Áudio
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20">
                  <MessageCircle className="w-4 h-4" /> Abrir WhatsApp
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
                  <FileText className="w-4 h-4" /> Gerar Relatório
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
