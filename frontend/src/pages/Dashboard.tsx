@@ -45,10 +45,10 @@ export default function Dashboard() {
              fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${activeId}`, { headers }),
           ]);
           
-          if (txRes.ok) setTransactions(await txRes.json());
-          if (goalsRes.ok) setGoals(await goalsRes.json());
-          if (vehiclesRes.ok) setVehicles(await vehiclesRes.json());
-          if (marketRes.ok) setMarket(await marketRes.json());
+          if (txRes.ok) { const d = await txRes.json(); setTransactions(Array.isArray(d) ? d : []); }
+          if (goalsRes.ok) { const d = await goalsRes.json(); setGoals(Array.isArray(d) ? d : []); }
+          if (vehiclesRes.ok) { const d = await vehiclesRes.json(); setVehicles(Array.isArray(d) ? d : []); }
+          if (marketRes.ok) { const d = await marketRes.json(); setMarket(Array.isArray(d) ? d : []); }
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
@@ -180,7 +180,7 @@ export default function Dashboard() {
   }, [realizedTx, userLocale]);
 
 
-  const recentTx = transactions.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+  const recentTx = [...transactions].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
 
   // IA Simples Baseada em Regras
   const renderInsights = () => {
@@ -441,14 +441,17 @@ export default function Dashboard() {
                  <button className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver todos</button>
               </div>
               <div className="space-y-3 flex-1 overflow-y-auto pr-1">
-                 {renderInsights().slice(0,3).map((insight, idx) => (
-                    <div key={idx} className="flex gap-3">
-                       <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${insight.bg}`}>
-                          <insight.icon className={`w-3 h-3 ${insight.color}`} />
+                 {renderInsights().slice(0,3).map((insight, idx) => {
+                    const Icon = insight.icon;
+                    return (
+                       <div key={idx} className="flex gap-3">
+                          <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${insight.bg}`}>
+                             <Icon className={`w-3 h-3 ${insight.color}`} />
+                          </div>
+                          <p className="text-[10px] text-gray-600 font-medium leading-relaxed">{insight.text}</p>
                        </div>
-                       <p className="text-[10px] text-gray-600 font-medium leading-relaxed">{insight.text}</p>
-                    </div>
-                 ))}
+                    );
+                 })}
               </div>
            </div>
         </div>
