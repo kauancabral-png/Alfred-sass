@@ -7,9 +7,10 @@ import {
 import { 
   ArrowUp, ArrowDown, Bell, Plus, Minus, Mic, MessageCircle, FileText, Download,
   ShoppingCart, Car, Target, TrendingUp, TrendingDown, Info, ChevronDown, Activity, 
-  Settings, CheckCircle, Briefcase, FileSignature, Wallet, DollarSign, Layers
+  Settings, CheckCircle, Briefcase, FileSignature, Wallet, DollarSign, Layers, X
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 // Cores para o gráfico de rosca (Top Despesas)
 const COLORS = ['#ef4444', '#f97316', '#3b82f6', '#8b5cf6', '#14b8a6', '#64748b'];
@@ -20,7 +21,99 @@ export default function Dashboard() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [market, setMarket] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const navigate = useNavigate();
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [selectedType, setSelectedType] = useState<'INCOME'|'EXPENSE'>('EXPENSE');
+  const [txDate, setTxDate] = useState(() => new Date().toISOString().split('T')[0]);
+
+  const openNewTransaction = (type: 'INCOME'|'EXPENSE') => {
+      setDescription('');
+      setAmount('');
+      setSelectedType(type);
+      setTxDate(new Date().toISOString().split('T')[0]);
+      setIsModalOpen(true);
+  };
+
+  const handleCreateTx = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const activeId = localStorage.getItem('activeProfileId');
+      const res = await fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ 
+          description, 
+          amount: selectedType === 'EXPENSE' ? -Math.abs(Number(amount)) : Math.abs(Number(amount)), 
+          type: selectedType, 
+          date: new Date(txDate).toISOString(),
+          profileId: activeId
+        })
+      });
+      if(res.ok) {
+        setIsModalOpen(false);
+        toast.success("Lançamento Concluído!");
+        fetchData();
+      } else {
+        toast.error("Erro ao salvar.");
+      }
+    } catch (e) {
+      toast.error("Erro na conexão");
+    }
+  };
+
+  const handleExportCSV = () => {
+     if(transactions.length === 0) {
+        toast.error('Nenhum dado para exportar.');
+        return;
+     }
+     const headers = ["Data", "Descricao", "Tipo", "Valor"];
+     const csvContent = [
+        headers.join(","),
+        ...transactions.map(t => [
+           new Date(t.date).toLocaleDateString(userLocale),
+           `"${t.description}"`,
+           t.type === 'INCOME' ? 'Receita' : 'Despesa',
+           t.amount
+        ].join(","))
+     ].join("\n");
+     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+     const link = document.createElement("a");
+     const url = URL.createObjectURL(blob);
+     link.setAttribute("href", url);
+     link.setAttribute("download", `extrato_alfred_${new Date().toISOString().split('T')[0]}.csv`);
+     link.style.visibility = 'hidden';
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const activeId = localStorage.getItem('activeProfileId');
+      if (activeId) {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [txRes, goalsRes, vehiclesRes, marketRes] = await Promise.all([
+           fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${activeId}&_t=${Date.now()}`, { headers }),
+           fetch(`https://alfred-backend-8t7n.onrender.com/api/goals?profileId=${activeId}`, { headers }),
+           fetch(`https://alfred-backend-8t7n.onrender.com/api/vehicles?profileId=${activeId}`, { headers }),
+           fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${activeId}`, { headers }),
+        ]);
+        
+        if (txRes.ok) { const d = await txRes.json(); setTransactions(Array.isArray(d) ? d : []); }
+        if (goalsRes.ok) { const d = await goalsRes.json(); setGoals(Array.isArray(d) ? d : []); }
+        if (vehiclesRes.ok) { const d = await vehiclesRes.json(); setVehicles(Array.isArray(d) ? d : []); }
+        if (marketRes.ok) { const d = await marketRes.json(); setMarket(Array.isArray(d) ? d : []); }
+      }
+    } catch (e) { console.error(e); } finally { setLoading(false); }
+  };
+
   const [profileMode, setProfileMode] = useState<'personal' | 'business'>(() => {
     return (localStorage.getItem('profileMode') as 'personal' | 'business') || 'personal';
   });
@@ -31,27 +124,6 @@ export default function Dashboard() {
   const avatarUrl = localStorage.getItem('userAvatar') || `https://ui-avatars.com/api/?name=${userName}&background=0D8ABC&color=fff&rounded=true`;
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const activeId = localStorage.getItem('activeProfileId');
-        if (activeId) {
-          const headers = { Authorization: `Bearer ${token}` };
-          const [txRes, goalsRes, vehiclesRes, marketRes] = await Promise.all([
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${activeId}&_t=${Date.now()}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/goals?profileId=${activeId}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/vehicles?profileId=${activeId}`, { headers }),
-             fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${activeId}`, { headers }),
-          ]);
-          
-          if (txRes.ok) { const d = await txRes.json(); setTransactions(Array.isArray(d) ? d : []); }
-          if (goalsRes.ok) { const d = await goalsRes.json(); setGoals(Array.isArray(d) ? d : []); }
-          if (vehiclesRes.ok) { const d = await vehiclesRes.json(); setVehicles(Array.isArray(d) ? d : []); }
-          if (marketRes.ok) { const d = await marketRes.json(); setMarket(Array.isArray(d) ? d : []); }
-        }
-      } catch (e) { console.error(e); } finally { setLoading(false); }
-    };
     fetchData();
 
     const handleStorageChange = () => {
@@ -729,28 +801,55 @@ export default function Dashboard() {
         <div className="pt-4 border-t border-gray-100">
            <h4 className="text-sm font-black text-gray-900 mb-4">Ações Rápidas</h4>
            <div className="flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors">
+              <button onClick={() => openNewTransaction('INCOME')} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors">
                  <Plus className="w-4 h-4" /> Nova Receita
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition-colors">
+              <button onClick={() => openNewTransaction('EXPENSE')} className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition-colors">
                  <Minus className="w-4 h-4" /> Nova Despesa
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold border border-purple-100 hover:bg-purple-100 transition-colors">
+              <button onClick={() => navigate('/bot')} className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold border border-purple-100 hover:bg-purple-100 transition-colors">
                  <Mic className="w-4 h-4" /> Enviar Áudio
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20">
+              <button onClick={() => window.open('https://wa.me/5511999999999?text=Ol%C3%A1%20Alfred!', '_blank')} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20">
                  <MessageCircle className="w-4 h-4" /> Abrir WhatsApp
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
+              <button onClick={() => navigate('/reports')} className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
                  <FileText className="w-4 h-4" /> Gerar Relatório
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
+              <button onClick={handleExportCSV} className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
                  <Download className="w-4 h-4" /> Exportar CSV
               </button>
            </div>
         </div>
 
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4 fade-in font-sans">
+          <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 p-10">
+            <div className="flex justify-between items-center mb-8">
+               <h2 className="text-2xl font-black text-slate-800 tracking-tight">Novo Lançamento</h2>
+               <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center"><X className="text-slate-400 w-5 h-5"/></button>
+            </div>
+            
+            <form onSubmit={handleCreateTx} className="space-y-6">
+              <div className="flex gap-4 p-2 bg-slate-50 rounded-[2rem]">
+                 <button type="button" onClick={() => setSelectedType('INCOME')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'INCOME' ? 'bg-white text-green-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Receita</button>
+                 <button type="button" onClick={() => setSelectedType('EXPENSE')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'EXPENSE' ? 'bg-white text-red-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Despesa</button>
+              </div>
+
+              <input required value={description} onChange={(e) => setDescription(e.target.value)} type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-sm font-black focus:border-blue-500 outline-none transition-all shadow-inner" placeholder="Especifique o gasto ou receita" />
+              <input required value={amount} onChange={(e) => setAmount(e.target.value)} type="number" step="0.01" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-sm font-black focus:border-blue-500 outline-none transition-all shadow-inner" placeholder={`${userCurrency} 0.00`} />
+              <input required value={txDate} onChange={(e) => setTxDate(e.target.value)} type="date" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-xs font-black outline-none transition-all shadow-inner" />
+
+              <button type="submit" className="w-full bg-slate-900 text-white font-black py-6 rounded-[3rem] shadow-xl hover:bg-black transition-all active:scale-95 text-lg uppercase tracking-tight">
+                Efetivar Lançamento 🏛️
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </Layout>
   );
 }
