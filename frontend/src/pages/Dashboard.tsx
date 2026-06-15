@@ -180,6 +180,10 @@ export default function Dashboard() {
      if(profileMode === mode) return;
      setProfileMode(mode);
      localStorage.setItem('profileMode', mode);
+     const activeId = mode === 'business' ? localStorage.getItem('businessProfileId') : localStorage.getItem('personalProfileId');
+     if (activeId) {
+        localStorage.setItem('activeProfileId', activeId);
+     }
      window.dispatchEvent(new Event('profileModeChanged'));
   };
 

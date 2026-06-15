@@ -45,8 +45,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           const personal = profiles.find((p: any) => p.type === 'PERSONAL');
           const business = profiles.find((p: any) => p.type === 'BUSINESS');
           
-          if (personal) setPersonalProfileId(personal.id);
-          if (business) setBusinessProfileId(business.id);
+          if (personal) {
+             setPersonalProfileId(personal.id);
+             localStorage.setItem('personalProfileId', personal.id);
+          }
+          if (business) {
+             setBusinessProfileId(business.id);
+             localStorage.setItem('businessProfileId', business.id);
+          }
           
           // Ensure activeProfileId is initially set
           const savedMode = localStorage.getItem('profileMode') || 'personal';
