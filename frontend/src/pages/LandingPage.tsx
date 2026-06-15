@@ -432,11 +432,11 @@ export default function LandingPage() {
                </div>
                
                <div className="space-y-4 md:space-y-5 mb-8">
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Conexión de cuentas ilimitadas</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Doble perfil: Personal y Empresarial</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Generación de Flujo de Caja y DRE automático</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Alertas y categorización inteligente por WhatsApp</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-green-400 shrink-0"/> <span className="text-sm font-bold text-white">Pago único de por vida (Sin mensualidades)</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Panel de control personalizado</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Mayordomo en WhatsApp</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Perfil Empresarial y Personal</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Soporte prioritario</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-green-400 shrink-0"/> <span className="text-sm font-bold text-white">Sin compromisos</span></div>
                </div>
 
                {/* Bonuses highlighted */}
