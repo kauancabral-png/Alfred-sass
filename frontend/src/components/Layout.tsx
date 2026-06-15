@@ -117,8 +117,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const menuItems = profileMode === 'personal' ? personalMenu : businessMenu;
   const isBusiness = profileMode === 'business';
   
-  const bgLayout = isBusiness ? 'bg-[#0A0A0A]' : 'bg-[#F4F7FA]';
-  const bgSidebar = 'bg-[#111111]';
+  const bgLayout = 'bg-[#F4F7FA]';
+  const bgSidebar = isBusiness ? 'bg-[#0f2847]' : 'bg-[#111111]';
   const borderClass = 'border-white/5';
   const textClass = 'text-white';
   const textMuted = 'text-gray-400';
@@ -161,7 +161,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </button>
               <button 
                 onClick={() => profileMode !== 'business' && toggleProfileMode()}
-                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-white/20 text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
                 Empresarial
               </button>
@@ -179,7 +179,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </button>
               <button 
                 onClick={() => profileMode !== 'business' && toggleProfileMode()}
-                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-white/20 text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
                 Empresarial
               </button>
@@ -196,8 +196,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-full transition-all duration-200 ${
                     isActive 
-                      ? (isBusiness ? 'bg-[#00FF00]/10 text-[#00FF00] font-semibold' : 'bg-[#2a2a2a] text-white font-semibold shadow-sm')
-                      : `${textMuted} hover:bg-[#1a1a1a] hover:${textClass}`
+                      ? (isBusiness ? 'bg-white/20 text-white font-semibold shadow-sm' : 'bg-[#2a2a2a] text-white font-semibold shadow-sm')
+                      : `${textMuted} hover:bg-white/10 hover:${textClass}`
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? (isBusiness ? 'text-[#00FF00]' : 'text-white') : ''}`} />
