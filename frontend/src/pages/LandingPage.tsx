@@ -10,8 +10,7 @@ export default function LandingPage() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('opacity-100', 'translate-y-0');
-          entry.target.classList.remove('opacity-0', 'translate-y-8');
+          entry.target.classList.add('active');
         }
       });
     }, { threshold: 0.1 });
@@ -48,6 +47,10 @@ export default function LandingPage() {
           opacity: 0;
           transform: translateY(32px);
           transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
         }
 
         .logo-carousel {
