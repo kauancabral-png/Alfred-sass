@@ -37,6 +37,10 @@ export default function LandingPage() {
     document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToPricing = () => {
+    document.getElementById('planes-y-precios')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-[#000000] font-sans text-white selection:bg-white selection:text-black" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       <style>{`
@@ -230,7 +234,7 @@ export default function LandingPage() {
          <div className="reveal flex-1 text-center md:text-left">
             <h3 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">¿Sorpresas en la factura? Conmigo, no.</h3>
             <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Sé lo que es abrir la factura y no entender nada. Alfred analiza tus gastos y te avisa antes de que pierdas el control.</p>
-            <button onClick={handleCheckout} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
+            <button onClick={scrollToPricing} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
                Descubrir sorpresas
             </button>
          </div>
@@ -254,7 +258,7 @@ export default function LandingPage() {
          <div className="reveal flex-1 text-center md:text-left">
             <h3 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">Te muestro hacia dónde va tu dinero.</h3>
             <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Categorización automática con Inteligencia Artificial. Encuentro patrones para que ahorres sin sufrir.</p>
-            <button onClick={handleCheckout} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
+            <button onClick={scrollToPricing} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
                Categorizar gastos
             </button>
          </div>
@@ -278,7 +282,7 @@ export default function LandingPage() {
          <div className="reveal flex-1 text-center md:text-left">
             <h3 className="text-3xl md:text-4xl md:text-5xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">Pregunta a tu manera que yo entiendo.</h3>
             <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium max-w-xl mx-auto md:mx-0">Un mayordomo en tu bolsillo, directamente en WhatsApp. Conversa conmigo como si fuera un amigo.</p>
-            <button onClick={handleCheckout} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
+            <button onClick={scrollToPricing} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
                Hablar con Alfred
             </button>
          </div>
@@ -404,7 +408,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing with Anchoring, Scarcity and Bonuses */}
-      <section className="py-16 md:py-24 px-6 bg-[#050505] border-t border-white/5">
+      <section id="planes-y-precios" className="py-16 md:py-24 px-6 bg-[#050505] border-t border-white/5">
          <div className="max-w-sm md:max-w-md mx-auto reveal text-center">
             <h2 className="text-3xl md:text-5xl font-black mb-4 text-white tracking-tighter">Planes y precios</h2>
             <p className="text-neutral-400 text-sm md:text-base font-medium mb-8">Un solo pago. Tu tranquilidad financiera siempre al día.</p>
@@ -428,15 +432,17 @@ export default function LandingPage() {
                </div>
                
                <div className="space-y-4 md:space-y-5 mb-8">
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Cuentas ilimitadas</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Perfil Personal y Empresarial</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Agentes autónomos con IA</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Conexión de cuentas ilimitadas</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Doble perfil: Personal y Empresarial</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Generación de Flujo de Caja y DRE automático</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Alertas y categorización inteligente por WhatsApp</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-green-400 shrink-0"/> <span className="text-sm font-bold text-white">Pago único de por vida (Sin mensualidades)</span></div>
                </div>
 
                {/* Bonuses highlighted */}
                <div className="pt-6 mt-6 border-t border-white/5 mb-8">
                   <p className="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Incluye Bonos Especiales:</p>
-                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0"/> <span className="text-sm font-bold text-white">Guía de Impuestos Personales y Agencia (PDF)</span></div>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0"/> <span className="text-sm font-bold text-white">Guía de Impuestos Personales y Agencia</span></div>
                   <div className="flex items-start gap-3"><Star className="w-5 h-5 text-yellow-400 shrink-0"/> <span className="text-sm font-bold text-white">Acceso Prioritario a nuevas funciones IA</span></div>
                </div>
 
