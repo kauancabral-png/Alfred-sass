@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { CheckCircle2, ChevronDown } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Utensils, Home } from 'lucide-react';
 
 export default function LandingPage() {
   const checkoutUrl = "https://pay.hotmart.com/L105225408E?checkoutMode=10&bid=1781537060087";
@@ -66,6 +66,22 @@ export default function LandingPage() {
         .phone-mockup {
           box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1);
         }
+
+        /* Float animations for notifications */
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes float-slower {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(15px); }
+        }
+        .animate-float {
+          animation: float-slow 4s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float-slower 5s ease-in-out infinite;
+        }
       `}</style>
 
       {/* Navbar */}
@@ -95,62 +111,94 @@ export default function LandingPage() {
             Comenzar ahora
          </button>
 
-         {/* Phone Mockup - Hero Image */}
-         <div className="reveal relative w-full max-w-[320px] mx-auto h-[600px] bg-[#0a0a0a] rounded-[3rem] border-[6px] border-[#1a1a1a] phone-mockup overflow-hidden flex flex-col">
-            {/* Phone Notch */}
-            <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-20">
-               <div className="w-32 h-6 bg-[#1a1a1a] rounded-b-3xl"></div>
-            </div>
+         {/* Phone Wrapper (Relative for floating elements outside) */}
+         <div className="reveal relative w-full max-w-[320px] mx-auto mt-4 md:mt-10">
             
-            {/* App UI Concept */}
-            <div className="flex-1 w-full bg-[#050505] p-5 pt-12 relative flex flex-col">
-               <h3 className="text-left text-neutral-500 font-bold text-xs uppercase tracking-widest mb-1">Mi Saldo</h3>
-               <p className="text-left text-white font-black text-3xl mb-8 tracking-tighter">$ 4,250.00</p>
-               
-               <div className="flex gap-2 mb-8">
-                  <div className="flex-1 bg-[#111] border border-white/5 rounded-2xl p-4">
-                     <p className="text-green-400 font-black text-lg">+$5k</p>
-                     <p className="text-neutral-500 text-xs font-semibold">Ingresos</p>
+            {/* Notification 1: Comida (Floating Outside Left) */}
+            <div className="absolute top-24 -left-[20%] md:-left-[40%] z-30 bg-[#111] border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float min-w-[240px] md:min-w-[280px]">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white shrink-0">
+                     <Utensils className="w-5 h-5" />
                   </div>
-                  <div className="flex-1 bg-[#111] border border-white/5 rounded-2xl p-4">
-                     <p className="text-red-400 font-black text-lg">-$750</p>
-                     <p className="text-neutral-500 text-xs font-semibold">Gastos</p>
+                  <div className="text-left">
+                     <p className="text-sm font-bold text-white tracking-tight leading-tight">Comida a domicilio</p>
+                     <p className="text-xs text-neutral-400">Alimentación • 28 de Jun</p>
                   </div>
                </div>
+               <p className="text-sm font-black text-white shrink-0">-$ 42.00</p>
+            </div>
 
-               <div className="w-full bg-[#111] border border-white/5 rounded-2xl p-4 mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">🍔</div>
-                     <div>
-                        <p className="text-sm font-bold text-white">Comida</p>
-                        <p className="text-xs text-neutral-500">McDonalds</p>
+            {/* Notification 2: Hospedagem (Floating Outside Right) */}
+            <div className="absolute top-52 -right-[15%] md:-right-[35%] z-30 bg-[#111]/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float-delayed min-w-[240px] md:min-w-[280px]">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white shrink-0">
+                     <Home className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                     <p className="text-sm font-bold text-white tracking-tight leading-tight">Alojamiento</p>
+                     <p className="text-xs text-neutral-400">Viajes • 24 de Jun</p>
+                  </div>
+               </div>
+               <p className="text-sm font-black text-white shrink-0">-$ 120.00</p>
+            </div>
+
+            {/* WhatsApp Reminder Notification (Floating Outside Left) */}
+            <div className="absolute -top-6 md:-left-[20%] z-30 bg-[#1a1a1a] border border-white/10 shadow-2xl shadow-green-500/10 rounded-2xl p-3 flex items-center gap-3 animate-bounce" style={{ animationDuration: '3s' }}>
+               <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-black font-black text-sm shrink-0">A</div>
+               <p className="text-xs font-bold text-white max-w-[140px] leading-tight text-left">¡No olvides pagar tu tarjeta hoy! 💳</p>
+            </div>
+
+            {/* Actual Phone Mask (Overflow Hidden) */}
+            <div className="w-full h-[600px] bg-[#0a0a0a] rounded-[3rem] border-[6px] border-[#1a1a1a] phone-mockup overflow-hidden flex flex-col relative z-20">
+               {/* Phone Notch */}
+               <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-40">
+                  <div className="w-32 h-6 bg-[#1a1a1a] rounded-b-3xl"></div>
+               </div>
+               
+               {/* App UI Concept */}
+               <div className="flex-1 w-full bg-[#050505] p-5 pt-12 relative flex flex-col">
+                  <h3 className="text-left text-neutral-500 font-bold text-xs uppercase tracking-widest mb-1">Mi Saldo</h3>
+                  <p className="text-left text-white font-black text-3xl mb-8 tracking-tighter">$ 4,250.00</p>
+                  
+                  <div className="flex gap-2 mb-8">
+                     <div className="flex-1 bg-[#111] border border-white/5 rounded-2xl p-4">
+                        <p className="text-green-400 font-black text-lg">+$5k</p>
+                        <p className="text-neutral-500 text-xs font-semibold">Ingresos</p>
+                     </div>
+                     <div className="flex-1 bg-[#111] border border-white/5 rounded-2xl p-4">
+                        <p className="text-red-400 font-black text-lg">-$750</p>
+                        <p className="text-neutral-500 text-xs font-semibold">Gastos</p>
                      </div>
                   </div>
-                  <p className="text-sm font-bold text-white">-$ 15.00</p>
-               </div>
-               
-               <div className="w-full bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">🚗</div>
-                     <div>
-                        <p className="text-sm font-bold text-white">Transporte</p>
-                        <p className="text-xs text-neutral-500">Uber</p>
-                     </div>
-                  </div>
-                  <p className="text-sm font-bold text-white">-$ 8.50</p>
-               </div>
 
-               {/* Floating WhatsApp Notification */}
-               <div className="absolute top-32 -left-8 md:-left-16 bg-[#1a1a1a] border border-white/10 shadow-2xl rounded-2xl p-3 flex items-center gap-3 animate-bounce shadow-green-500/20" style={{ animationDuration: '3s' }}>
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-black font-black text-sm">A</div>
-                  <p className="text-xs font-bold text-white max-w-[120px] leading-tight">No olvides pagar tu tarjeta hoy! 💳</p>
+                  <div className="w-full bg-[#111] border border-white/5 rounded-2xl p-4 mb-4 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">🍔</div>
+                        <div>
+                           <p className="text-sm font-bold text-white">Comida</p>
+                           <p className="text-xs text-neutral-500">McDonalds</p>
+                        </div>
+                     </div>
+                     <p className="text-sm font-bold text-white">-$ 15.00</p>
+                  </div>
+                  
+                  <div className="w-full bg-[#111] border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">🚗</div>
+                        <div>
+                           <p className="text-sm font-bold text-white">Transporte</p>
+                           <p className="text-xs text-neutral-500">Uber</p>
+                        </div>
+                     </div>
+                     <p className="text-sm font-bold text-white">-$ 8.50</p>
+                  </div>
                </div>
             </div>
          </div>
       </section>
 
       {/* Bancos (Prova Social) */}
-      <section className="py-12 border-y border-white/5 bg-[#050505] overflow-hidden flex flex-col items-center reveal">
+      <section className="py-12 border-y border-white/5 bg-[#050505] overflow-hidden flex flex-col items-center reveal mt-20">
          <p className="text-xs font-bold text-neutral-500 mb-6 text-center uppercase tracking-widest">Bancos que ya confían:</p>
          <div className="w-full relative flex overflow-x-hidden">
             <div className="logo-carousel whitespace-nowrap flex items-center gap-12 px-6 text-2xl font-black text-neutral-800">
@@ -163,7 +211,7 @@ export default function LandingPage() {
       {/* Feature 1 */}
       <section className="py-20 px-6 max-w-lg md:max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10">
          <div className="reveal flex-1 text-center md:text-left">
-            <h3 className="text-3xl md:text-4xl font-black mb-4 text-white leading-[1.1] tracking-tight">¿Sorpresas en la factura? Comigo, no.</h3>
+            <h3 className="text-3xl md:text-4xl font-black mb-4 text-white leading-[1.1] tracking-tight">¿Sorpresas en la factura? Conmigo, no.</h3>
             <p className="text-neutral-400 text-base mb-6 leading-relaxed font-medium">Sé lo que es abrir la factura y no entender nada. Alfred analiza tus gastos y te avisa antes de que pierdas el control.</p>
             <button onClick={handleCheckout} className="bg-white text-black px-6 py-3 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
                Descubrir sorpresas
@@ -211,7 +259,7 @@ export default function LandingPage() {
       {/* WhatsApp Feature */}
       <section className="py-20 px-6 max-w-lg md:max-w-4xl mx-auto flex flex-col items-center gap-10">
          <div className="reveal text-center">
-            <h3 className="text-3xl md:text-4xl font-black mb-4 text-white leading-[1.1] tracking-tight">Pregunta de tu manera que yo entiendo.</h3>
+            <h3 className="text-3xl md:text-4xl font-black mb-4 text-white leading-[1.1] tracking-tight">Pregunta a tu manera que yo entiendo.</h3>
             <p className="text-neutral-400 text-base mb-6 leading-relaxed font-medium max-w-xl mx-auto">Un mayordomo en tu bolsillo, directamente en WhatsApp. Conversa conmigo como si fuera un amigo.</p>
             <button onClick={handleCheckout} className="bg-white text-black px-6 py-3 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors block mx-auto">
                Hablar con Alfred
@@ -239,35 +287,35 @@ export default function LandingPage() {
          </div>
       </section>
 
-      {/* Como Funciono (Vertical Timeline) */}
+      {/* Como Funciono (Vertical Timeline - Updated for Alfred) */}
       <section className="py-24 px-6 bg-[#050505]">
          <div className="max-w-lg mx-auto reveal">
-            <h2 className="text-3xl md:text-4xl font-black mb-16 text-center text-white tracking-tight">Como eu funciono</h2>
+            <h2 className="text-3xl md:text-4xl font-black mb-16 text-center text-white tracking-tight">Cómo funciona Alfred</h2>
             
             <div className="relative border-l border-white/10 ml-6 md:ml-10 space-y-12">
                
                <div className="relative pl-8">
                   <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-[#111] border border-white/20 flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(255,255,255,0.1)]">1</div>
-                  <h4 className="font-black text-xl text-white mb-2">Conexión de cuenta</h4>
-                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Te conectas a tu banco vía Open Finance de forma segura, con encriptación a nivel bancario.</p>
+                  <h4 className="font-black text-xl text-white mb-2">Conecta tu mundo</h4>
+                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Vincula tus cuentas bancarias. Alfred separa automáticamente tu dinero Personal del dinero de tu Empresa usando IA.</p>
                </div>
 
                <div className="relative pl-8">
                   <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-[#111] border border-white/20 flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(255,255,255,0.1)]">2</div>
-                  <h4 className="font-black text-xl text-white mb-2">Lectura de tus datos</h4>
-                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Alfred lee tus ingresos y gastos. Modo "solo lectura", sin permiso para mover tu dinero.</p>
+                  <h4 className="font-black text-xl text-white mb-2">Panel inteligente (Dashboard)</h4>
+                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Visualiza tu flujo de caja, DRE (Estado de Resultados) y métricas vitales en gráficos simples de entender. Un clic para alternar entre perfil personal y negocio.</p>
                </div>
 
                <div className="relative pl-8">
                   <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-[#111] border border-white/20 flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(255,255,255,0.1)]">3</div>
-                  <h4 className="font-black text-xl text-white mb-2">Análisis de IA</h4>
-                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Clasifica y entiende a dónde va cada centavo para armar un perfil financiero preciso.</p>
+                  <h4 className="font-black text-xl text-white mb-2">Inteligencia Autónoma</h4>
+                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Mi inteligencia artificial no solo clasifica; te avisa de gastos inusuales, sugiere recortes de suscripciones y proyecta tu futuro financiero.</p>
                </div>
 
                <div className="relative pl-8">
                   <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-[#111] border border-white/20 flex items-center justify-center font-black text-white text-sm shadow-[0_0_15px_rgba(255,255,255,0.1)]">4</div>
-                  <h4 className="font-black text-xl text-white mb-2">Asistencia vía WhatsApp</h4>
-                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Recibe alertas, haz preguntas y controla tu vida financiera directamente desde tu celular.</p>
+                  <h4 className="font-black text-xl text-white mb-2">Tu mayordomo en WhatsApp</h4>
+                  <p className="text-neutral-400 text-sm font-medium leading-relaxed">Añade entradas de efectivo, pregunta cuánto puedes gastar el fin de semana o recibe alertas de facturas directo en tu chat. Rápido y fácil.</p>
                </div>
 
             </div>
@@ -277,7 +325,7 @@ export default function LandingPage() {
       {/* Pricing */}
       <section className="py-24 px-6 bg-[#000000] border-y border-white/5">
          <div className="max-w-sm md:max-w-md mx-auto reveal text-center">
-            <h2 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tighter">Planos e preços</h2>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tighter">Planes y precios</h2>
             <p className="text-neutral-400 text-base font-medium mb-12">Un solo pago. Tu tranquilidad financiera siempre al día.</p>
 
             <div className="bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)] text-left relative overflow-hidden">
@@ -291,7 +339,7 @@ export default function LandingPage() {
                </div>
                
                <div className="space-y-4 mb-8">
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Bancos ilimitados</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Cuentas ilimitadas</span></div>
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Perfil Personal y Empresarial</span></div>
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Agentes autónomos con IA</span></div>
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Pago único de por vida</span></div>
