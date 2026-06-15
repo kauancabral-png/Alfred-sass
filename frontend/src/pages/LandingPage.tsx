@@ -322,6 +322,57 @@ export default function LandingPage() {
          </div>
       </section>
 
+      {/* Alfred en los Medios (Prova Social) */}
+      <section className="py-24 px-6 bg-[#050505] overflow-hidden">
+         <div className="max-w-6xl mx-auto reveal">
+            <h2 className="text-3xl md:text-4xl font-black mb-12 text-center text-white tracking-tight">Alfred en los medios.</h2>
+            
+            <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+               <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+
+               <div className="shrink-0 w-[85vw] max-w-[400px] snap-center bg-[#111] rounded-[2.5rem] p-8 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-[40px] -mr-10 -mt-10 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-10 relative z-10 group-hover:text-green-50 transition-colors">
+                     "La IA que finalmente hace fácil entender tu flujo de caja sin abrir una hoja de cálculo. Seguridad impecable."
+                  </p>
+                  <div className="flex justify-between items-end relative z-10">
+                     <p className="font-black text-white/50 tracking-widest uppercase text-xs">Exame Finanzas</p>
+                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="shrink-0 w-[85vw] max-w-[400px] snap-center bg-[#111] rounded-[2.5rem] p-8 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden">
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-[40px] -ml-10 -mb-10 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-10 relative z-10 group-hover:text-green-50 transition-colors">
+                     "Seguridad de grado bancario con Open Finance. El mayordomo que todas las empresas pequeñas estaban esperando."
+                  </p>
+                  <div className="flex justify-between items-end relative z-10">
+                     <p className="font-black text-white/50 tracking-widest uppercase text-xs">TechCrunch</p>
+                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="shrink-0 w-[85vw] max-w-[400px] snap-center bg-[#111] rounded-[2.5rem] p-8 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden">
+                  <div className="absolute top-1/2 right-1/2 w-32 h-32 bg-white/5 rounded-full blur-[40px] transform translate-x-1/2 -translate-y-1/2 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-10 relative z-10 group-hover:text-green-50 transition-colors">
+                     "Elimina la ansiedad de fin de mes. Alfred categoriza todo y te dice exactamente cuánto dinero te sobra."
+                  </p>
+                  <div className="flex justify-between items-end relative z-10">
+                     <p className="font-black text-white/50 tracking-widest uppercase text-xs">Forbes Latam</p>
+                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </section>
+
       {/* Pricing */}
       <section className="py-24 px-6 bg-[#000000] border-y border-white/5">
          <div className="max-w-sm md:max-w-md mx-auto reveal text-center">
