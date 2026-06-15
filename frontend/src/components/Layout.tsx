@@ -24,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [profileMode, setProfileMode] = useState<'personal' | 'business'>(() => {
     return (localStorage.getItem('profileMode') as 'personal' | 'business') || 'personal';
   });
+  const [currency, setCurrency] = useState(() => localStorage.getItem('userCurrency') || 'R$');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -88,30 +89,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const personalMenu = [
-    { icon: LayoutDashboard, label: 'Visão Geral', path: '/dashboard' },
-    { icon: ArrowRightLeft, label: 'Transações', path: '/transactions' },
-    { icon: ArrowUpCircle, label: 'Receitas', path: '/receitas' },
-    { icon: ArrowDownCircle, label: 'Despesas', path: '/despesas' },
-    { icon: Layers, label: 'Categorias', path: '/categorias' },
+    { icon: LayoutDashboard, label: 'Panel General', path: '/dashboard' },
+    { icon: ArrowRightLeft, label: 'Transacciones', path: '/transactions' },
+    { icon: ArrowUpCircle, label: 'Ingresos', path: '/receitas' },
+    { icon: ArrowDownCircle, label: 'Gastos', path: '/despesas' },
+    { icon: Layers, label: 'Categorías', path: '/categorias' },
     { icon: ShoppingCart, label: 'Mercado', path: '/mercado' },
-    { icon: Car, label: 'Veículos', path: '/veiculos' },
-    { icon: AlertTriangle, label: 'Dívidas', path: '/dividas' },
+    { icon: Car, label: 'Vehículos', path: '/veiculos' },
+    { icon: AlertTriangle, label: 'Deudas', path: '/dividas' },
     { icon: Target, label: 'Metas', path: '/goals' },
-    { icon: PieChart, label: 'Relatórios', path: '/reports' },
+    { icon: PieChart, label: 'Reportes', path: '/reports' },
     { icon: MessageCircle, label: 'Alfred AI', path: '/bot' },
-    { icon: Settings, label: 'Configurações', path: '/settings' },
+    { icon: Settings, label: 'Configuraciones', path: '/settings' },
   ];
 
   const businessMenu = [
-    { icon: LayoutDashboard, label: 'Painel de Negócios', path: '/dashboard' },
-    { icon: ArrowRightLeft, label: 'Fluxo de Caixa', path: '/transactions?category=flujo' },
-    { icon: PieChart, label: 'DRE / Resultados', path: '/reports?view=er' },
-    { icon: AlertTriangle, label: 'Contas a Pagar/Receber', path: '/dividas' },
-    { icon: User, label: 'Folha de Pagamento', path: '/transactions?category=payroll' },
-    { icon: ShoppingCart, label: 'Insumos e Estoque', path: '/mercado' },
-    { icon: Car, label: 'Logística e Frota', path: '/veiculos' },
+    { icon: LayoutDashboard, label: 'Panel de Negocios', path: '/dashboard' },
+    { icon: ArrowRightLeft, label: 'Flujo de Caja', path: '/transactions?category=flujo' },
+    { icon: PieChart, label: 'ER / Resultados', path: '/reports?view=er' },
+    { icon: AlertTriangle, label: 'Cuentas por Pagar/Cobrar', path: '/dividas' },
+    { icon: User, label: 'Nómina', path: '/transactions?category=payroll' },
+    { icon: ShoppingCart, label: 'Insumos e Inventario', path: '/mercado' },
+    { icon: Car, label: 'Logística y Flota', path: '/veiculos' },
     { icon: Target, label: 'Metas (KPIs)', path: '/goals' },
-    { icon: Settings, label: 'Configurações', path: '/settings' },
+    { icon: Settings, label: 'Configuraciones', path: '/settings' },
   ];
 
   const menuItems = profileMode === 'personal' ? personalMenu : businessMenu;
@@ -157,13 +158,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onClick={() => profileMode !== 'personal' && toggleProfileMode()}
                 className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'personal' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
-                Pessoal
+                Personal
               </button>
               <button 
                 onClick={() => profileMode !== 'business' && toggleProfileMode()}
                 className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-white/20 text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
-                Empresarial
+                Empresa
               </button>
             </div>
           </div>
@@ -175,13 +176,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onClick={() => profileMode !== 'personal' && toggleProfileMode()}
                 className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'personal' ? 'bg-[#2a2a2a] text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
-                Pessoal
+                Personal
               </button>
               <button 
                 onClick={() => profileMode !== 'business' && toggleProfileMode()}
                 className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${profileMode === 'business' ? 'bg-white/20 text-white shadow-sm' : `${textMuted} hover:${textClass}`}`}
               >
-                Empresarial
+                Empresa
               </button>
             </div>
             <div className={`text-[11px] uppercase text-gray-500 font-bold mb-4 tracking-wider pl-3 mt-2`}>Menú Principal</div>
@@ -208,9 +209,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className={`p-4 border-t ${borderClass} mt-auto`}>
+          <div className="mb-4 flex items-center justify-between px-2">
+            <span className="text-xs text-gray-400 font-medium">Moneda</span>
+            <select 
+              value={currency}
+              onChange={(e) => {
+                setCurrency(e.target.value);
+                localStorage.setItem('userCurrency', e.target.value);
+                window.dispatchEvent(new Event('currencyChanged'));
+              }}
+              className="bg-[#1a1a1a] text-xs text-white border border-white/10 rounded-md px-2 py-1 outline-none"
+            >
+              <option value="USD">USD ($)</option>
+              <option value="MXN">MXN ($)</option>
+              <option value="COP">COP ($)</option>
+              <option value="ARS">ARS ($)</option>
+              <option value="BRL">BRL (R$)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
           <button onClick={handleLogout} className={`flex items-center gap-3 px-4 py-3 w-full rounded-full ${textMuted} hover:bg-red-500/10 hover:text-red-400 transition-colors`}>
             <LogOut className="w-5 h-5" />
-            <span className="text-sm font-medium">Sair</span>
+            <span className="text-sm font-medium">Cerrar sesión</span>
           </button>
         </div>
       </aside>

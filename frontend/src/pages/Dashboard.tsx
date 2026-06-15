@@ -27,7 +27,9 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [selectedType, setSelectedType] = useState<'INCOME'|'EXPENSE'>('EXPENSE');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [selectedType, setSelectedType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
   const [txDate, setTxDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   const openNewTransaction = (type: 'INCOME'|'EXPENSE') => {
@@ -93,11 +95,24 @@ export default function Dashboard() {
   };
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const activeId = localStorage.getItem('activeProfileId');
       if (activeId) {
+        // Optimistic Load from Cache (SWR Pattern)
+        const cachedTx = sessionStorage.getItem(`tx_${activeId}`);
+        const cachedGoals = sessionStorage.getItem(`goals_${activeId}`);
+        const cachedVehicles = sessionStorage.getItem(`vehicles_${activeId}`);
+        const cachedMarket = sessionStorage.getItem(`market_${activeId}`);
+        
+        if (cachedTx) setTransactions(JSON.parse(cachedTx));
+        if (cachedGoals) setGoals(JSON.parse(cachedGoals));
+        if (cachedVehicles) setVehicles(JSON.parse(cachedVehicles));
+        if (cachedMarket) setMarket(JSON.parse(cachedMarket));
+        
+        if (cachedTx) setLoading(false);
+        else setLoading(true);
+
         const headers = { Authorization: `Bearer ${token}` };
         const [txRes, goalsRes, vehiclesRes, marketRes] = await Promise.all([
            fetch(`https://alfred-backend-8t7n.onrender.com/api/transactions?profileId=${activeId}&_t=${Date.now()}`, { headers }),
@@ -106,10 +121,30 @@ export default function Dashboard() {
            fetch(`https://alfred-backend-8t7n.onrender.com/api/market?profileId=${activeId}`, { headers }),
         ]);
         
-        if (txRes.ok) { const d = await txRes.json(); setTransactions(Array.isArray(d) ? d : []); }
-        if (goalsRes.ok) { const d = await goalsRes.json(); setGoals(Array.isArray(d) ? d : []); }
-        if (vehiclesRes.ok) { const d = await vehiclesRes.json(); setVehicles(Array.isArray(d) ? d : []); }
-        if (marketRes.ok) { const d = await marketRes.json(); setMarket(Array.isArray(d) ? d : []); }
+        if (txRes.ok) { 
+           const d = await txRes.json(); 
+           const validData = Array.isArray(d) ? d : [];
+           setTransactions(validData); 
+           sessionStorage.setItem(`tx_${activeId}`, JSON.stringify(validData));
+        }
+        if (goalsRes.ok) { 
+           const d = await goalsRes.json(); 
+           const validData = Array.isArray(d) ? d : [];
+           setGoals(validData); 
+           sessionStorage.setItem(`goals_${activeId}`, JSON.stringify(validData));
+        }
+        if (vehiclesRes.ok) { 
+           const d = await vehiclesRes.json(); 
+           const validData = Array.isArray(d) ? d : [];
+           setVehicles(validData); 
+           sessionStorage.setItem(`vehicles_${activeId}`, JSON.stringify(validData));
+        }
+        if (marketRes.ok) { 
+           const d = await marketRes.json(); 
+           const validData = Array.isArray(d) ? d : [];
+           setMarket(validData); 
+           sessionStorage.setItem(`market_${activeId}`, JSON.stringify(validData));
+        }
       }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
@@ -119,8 +154,8 @@ export default function Dashboard() {
   });
 
   const userName = localStorage.getItem('userName') || 'Mestre';
-  const userCurrency = localStorage.getItem('userCurrency') || 'R$';
-  const userLocale = localStorage.getItem('userLocale') || 'pt-BR';
+  const [userCurrency, setUserCurrency] = useState(localStorage.getItem('userCurrency') || 'R$');
+  const userLocale = 'es-MX'; // Force Latin American Spanish formatting
   const avatarUrl = localStorage.getItem('userAvatar') || `https://ui-avatars.com/api/?name=${userName}&background=0D8ABC&color=fff&rounded=true`;
 
   useEffect(() => {
@@ -130,8 +165,15 @@ export default function Dashboard() {
       const mode = localStorage.getItem('profileMode') as 'personal' | 'business';
       if (mode) setProfileMode(mode);
     };
+    const handleCurrencyChange = () => {
+      setUserCurrency(localStorage.getItem('userCurrency') || 'R$');
+    };
     window.addEventListener('profileModeChanged', handleStorageChange);
-    return () => window.removeEventListener('profileModeChanged', handleStorageChange);
+    window.addEventListener('currencyChanged', handleCurrencyChange);
+    return () => {
+      window.removeEventListener('profileModeChanged', handleStorageChange);
+      window.removeEventListener('currencyChanged', handleCurrencyChange);
+    };
   }, [profileMode]);
 
   const toggleProfile = (mode: 'personal' | 'business') => {
@@ -306,12 +348,12 @@ export default function Dashboard() {
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-[160px]">
               <div>
                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-bold text-gray-500">Saldo Atual</span>
+                    <span className="text-sm font-bold text-gray-500">Saldo Actual</span>
                     <Info className="w-3 h-3 text-gray-300" />
                  </div>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(balance)}</h2>
                  <p className="text-[11px] font-bold text-green-500 flex items-center gap-1 mt-1">
-                    <ArrowUp className="w-3 h-3" /> Atualizado <span className="text-gray-400 font-medium">hoje</span>
+                    <ArrowUp className="w-3 h-3" /> Actualizado <span className="text-gray-400 font-medium">hoy</span>
                  </p>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
@@ -327,9 +369,9 @@ export default function Dashboard() {
                  <ArrowUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Receitas do Mês</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Ingresos del Mes</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(totalIncome)}</h2>
-                 <p className="text-xs text-gray-400 font-medium mt-1">{incomes.length} entradas registradas</p>
+                 <p className="text-xs text-gray-400 font-medium mt-1">{incomes.length} ingresos registrados</p>
               </div>
            </div>
 
@@ -339,9 +381,9 @@ export default function Dashboard() {
                  <ArrowDown className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Despesas do Mês</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Gastos del Mes</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(totalExpense)}</h2>
-                 <p className="text-xs text-gray-400 font-medium mt-1">{expenses.length} gastos contabilizados</p>
+                 <p className="text-xs text-gray-400 font-medium mt-1">{expenses.length} gastos registrados</p>
               </div>
            </div>
 
@@ -351,12 +393,12 @@ export default function Dashboard() {
                  <Target className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Economia do Mês</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Ahorro del Mes</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(savings)}</h2>
               </div>
               <div className="mt-2">
                  <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 mb-1">
-                    <span>Meta de proteção atingida: {savingsGoalProgress}%</span>
+                    <span>Meta de protección alcanzada: {savingsGoalProgress}%</span>
                  </div>
                  <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                     <div className="bg-purple-500 h-full rounded-full" style={{ width: `${savingsGoalProgress}%` }}></div>
@@ -369,14 +411,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
            <div className="lg:col-span-2 bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
               <div className="flex justify-between items-center mb-8">
-                 <h3 className="text-lg font-black text-gray-900">Fluxo de Caixa</h3>
+                 <h3 className="text-lg font-black text-gray-900">Flujo de Caja</h3>
                  <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 mr-4">
-                       <span className="flex items-center gap-1 text-xs font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-green-500"></div> Receitas</span>
-                       <span className="flex items-center gap-1 text-xs font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Despesas</span>
+                       <span className="flex items-center gap-1 text-xs font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-green-500"></div> Ingresos</span>
+                       <span className="flex items-center gap-1 text-xs font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Gastos</span>
                     </div>
                     <button className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                       Últimos 14 dias <ChevronDown className="w-3 h-3" />
+                       Últimos 14 días <ChevronDown className="w-3 h-3" />
                     </button>
                  </div>
               </div>
@@ -395,7 +437,7 @@ export default function Dashboard() {
                        </defs>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} dy={10} />
-                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `R$ ${val/1000}k`} />
+                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `${userCurrency} ${val/1000}k`} />
                        <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }} labelStyle={{ color: '#64748b', marginBottom: '4px' }} />
                        <Area type="monotone" dataKey="Receitas" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorRec)" />
                        <Area type="monotone" dataKey="Despesas" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorDes)" />
@@ -406,8 +448,8 @@ export default function Dashboard() {
 
            <div className="bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col">
               <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-lg font-black text-gray-900">Últimas Movimentações</h3>
-                 <NavLink to="/transactions" className="text-xs font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">Ver todas</NavLink>
+                 <h3 className="text-lg font-black text-gray-900">Últimos Movimientos</h3>
+                 <NavLink to="/transactions" className="text-xs font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">Ver todos</NavLink>
               </div>
               <div className="flex-1 flex flex-col gap-5 overflow-y-auto pr-2">
                  {recentTx.length === 0 ? (
@@ -462,7 +504,7 @@ export default function Dashboard() {
                     </div>
                  </div>
               ) : (
-                 <p className="text-xs text-gray-400 font-medium">Nenhuma meta configurada.</p>
+                 <p className="text-xs text-gray-400 font-medium">Ninguna meta configurada.</p>
               )}
            </div>
 
@@ -483,7 +525,7 @@ export default function Dashboard() {
                     </div>
                  </div>
               ) : (
-                 <p className="text-xs text-gray-400 font-medium">Nenhum produto monitorado.</p>
+                 <p className="text-xs text-gray-400 font-medium">Ningún producto monitoreado.</p>
               )}
            </div>
 
@@ -497,7 +539,7 @@ export default function Dashboard() {
                     <Car className="w-6 h-6 text-gray-400" />
                  </div>
                  <div className="flex-1">
-                    <p className="font-bold text-gray-900 text-sm mb-1">Veículo Principal</p>
+                    <p className="font-bold text-gray-900 text-sm mb-1">Vehículo Principal</p>
                     <p className="text-xs text-gray-500 font-medium mb-1">Total: <span className="font-black text-gray-900">{formatMoney(vehicles.reduce((a,b)=>a+b.amount,0))}</span></p>
                     <div className="flex gap-2 mt-2">
                        <div className="w-6 h-6 bg-gray-50 rounded border border-gray-200 flex items-center justify-center"><Activity className="w-3 h-3 text-gray-500" /></div>
@@ -509,7 +551,7 @@ export default function Dashboard() {
 
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-4">
-                 <h4 className="text-sm font-black text-gray-900">Resumo IA</h4>
+                 <h4 className="text-sm font-black text-gray-900">Resumen de IA</h4>
                  <button className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver todos</button>
               </div>
               <div className="space-y-3 flex-1 overflow-y-auto pr-1">
@@ -543,7 +585,7 @@ export default function Dashboard() {
                  <ArrowUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Faturamento Bruto</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Facturación Bruta</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.receitaBruta)}</h2>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
@@ -559,7 +601,7 @@ export default function Dashboard() {
                  <ArrowDown className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Despesas Operacionais</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Gastos Operativos</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.despesasOps)}</h2>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
@@ -575,11 +617,11 @@ export default function Dashboard() {
                  <ArrowUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Lucro Líquido</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Utilidad Neta</span>
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.lucroLiquido)}</h2>
               </div>
               <p className="text-[11px] font-bold text-green-500 flex items-center gap-1 mt-1">
-                 <ArrowUp className="w-3 h-3" /> Gerado das operações
+                 <ArrowUp className="w-3 h-3" /> Generado de operaciones
               </p>
            </div>
 
@@ -589,7 +631,7 @@ export default function Dashboard() {
                  <Target className="w-5 h-5 text-white" />
               </div>
               <div>
-                 <span className="text-sm font-bold text-gray-500 mb-2 block">Margem de Lucro</span>
+                 <span className="text-sm font-bold text-gray-500 mb-2 block">Margen de Utilidad</span>
                  <h2 className="text-2xl font-black text-gray-900">{dre.margem.toFixed(2)}%</h2>
               </div>
               <div className="mt-2">
@@ -605,15 +647,15 @@ export default function Dashboard() {
            {/* Fluxo de Caixa Empresarial */}
            <div className="lg:col-span-2 bg-white rounded-[1.5rem] p-8 border border-gray-100 shadow-sm flex flex-col min-h-[400px]">
               <div className="flex justify-between items-center mb-8">
-                 <h3 className="text-lg font-black text-gray-900">Fluxo de Caixa Empresarial</h3>
+                 <h3 className="text-lg font-black text-gray-900">Flujo de Caja Empresarial</h3>
                  <div className="flex items-center gap-4">
                     <div className="hidden md:flex items-center gap-3 mr-4">
-                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-green-500"></div> Entradas</span>
-                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Saídas</span>
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-green-500"></div> Ingresos</span>
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Gastos</span>
                        <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Saldo</span>
                     </div>
                     <button className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                       Últimos 14 dias <ChevronDown className="w-3 h-3" />
+                       Últimos 14 días <ChevronDown className="w-3 h-3" />
                     </button>
                  </div>
               </div>
@@ -622,7 +664,7 @@ export default function Dashboard() {
                     <LineChart data={businessChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} dy={10} />
-                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `R$ ${val/1000}k`} />
+                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `${userCurrency} ${val/1000}k`} />
                        <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
                        <Line type="monotone" dataKey="Entradas" stroke="#22c55e" strokeWidth={3} dot={false} />
                        <Line type="monotone" dataKey="Saidas" stroke="#ef4444" strokeWidth={3} dot={false} />
@@ -637,8 +679,8 @@ export default function Dashboard() {
               <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex-1">
                  <div className="flex justify-between items-start mb-6">
                     <div>
-                       <h3 className="text-sm font-black text-gray-900">Contas a Receber</h3>
-                       <p className="text-[11px] text-gray-500 font-medium">Total a receber (Previsto)</p>
+                       <h3 className="text-sm font-black text-gray-900">Cuentas por Cobrar</h3>
+                       <p className="text-[11px] text-gray-500 font-medium">Total por cobrar (Proyectado)</p>
                     </div>
                     <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-md">{billsToReceive.length} títulos</span>
                  </div>
@@ -646,14 +688,14 @@ export default function Dashboard() {
                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden mb-2">
                     <div className="bg-green-500 h-full rounded-full" style={{ width: '45%' }}></div>
                  </div>
-                 <p className="text-[10px] text-gray-400 font-medium text-right">A vencer próximos 7 dias</p>
+                 <p className="text-[10px] text-gray-400 font-medium text-right">Vencimiento en próximos 7 días</p>
               </div>
 
               <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex-1">
                  <div className="flex justify-between items-start mb-6">
                     <div>
-                       <h3 className="text-sm font-black text-gray-900">Contas a Pagar</h3>
-                       <p className="text-[11px] text-gray-500 font-medium">Total a pagar (Aberto)</p>
+                       <h3 className="text-sm font-black text-gray-900">Cuentas por Pagar</h3>
+                       <p className="text-[11px] text-gray-500 font-medium">Total por pagar (Pendiente)</p>
                     </div>
                     <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-md">{billsToPay.length} títulos</span>
                  </div>
@@ -661,7 +703,7 @@ export default function Dashboard() {
                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden mb-2">
                     <div className="bg-red-500 h-full rounded-full" style={{ width: '70%' }}></div>
                  </div>
-                 <p className="text-[10px] text-gray-400 font-medium text-right">A vencer próximos 7 dias</p>
+                 <p className="text-[10px] text-gray-400 font-medium text-right">Vencimiento en próximos 7 días</p>
               </div>
            </div>
         </div>
@@ -672,24 +714,24 @@ export default function Dashboard() {
            {/* DRE Inteligente */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
               <div className="flex justify-between items-center mb-6">
-                 <h4 className="text-sm font-black text-gray-900">DRE Resumido</h4>
+                 <h4 className="text-sm font-black text-gray-900">ER Resumido</h4>
                  <NavLink to="/reports" className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-200 hover:bg-gray-100">Ver completo</NavLink>
               </div>
               <div className="space-y-3 flex-1 text-sm">
-                 <div className="flex justify-between"><span className="text-gray-500 font-medium">Receita Bruta</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaBruta)}</span></div>
-                 <div className="flex justify-between"><span className="text-gray-400">(-) Deduções/Impostos</span><span className="text-red-500">-{formatMoney(dre.deducoes)}</span></div>
-                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Receita Líquida</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaLiquida)}</span></div>
-                 <div className="flex justify-between"><span className="text-gray-400">(-) Custos/Produtos</span><span className="text-red-500">-{formatMoney(dre.custos)}</span></div>
-                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Lucro Bruto</span><span className="font-bold text-gray-900">{formatMoney(dre.lucroBruto)}</span></div>
-                 <div className="flex justify-between"><span className="text-gray-400">(-) Despesas Ops.</span><span className="text-red-500">-{formatMoney(dre.despesasOps)}</span></div>
-                 <div className="flex justify-between pt-3 mt-1 border-t-2 border-gray-100"><span className="text-gray-900 font-black">LUCRO LÍQUIDO</span><span className="font-black text-green-600">{formatMoney(dre.lucroLiquido)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-500 font-medium">Ingresos Brutos</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaBruta)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Deducciones/Impuestos</span><span className="text-red-500">-{formatMoney(dre.deducoes)}</span></div>
+                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Ingresos Netos</span><span className="font-bold text-gray-900">{formatMoney(dre.receitaLiquida)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Costos/Productos</span><span className="text-red-500">-{formatMoney(dre.custos)}</span></div>
+                 <div className="flex justify-between pt-2 border-t border-gray-100"><span className="text-gray-700 font-bold">Utilidad Bruta</span><span className="font-bold text-gray-900">{formatMoney(dre.lucroBruto)}</span></div>
+                 <div className="flex justify-between"><span className="text-gray-400">(-) Gastos Ops.</span><span className="text-red-500">-{formatMoney(dre.despesasOps)}</span></div>
+                 <div className="flex justify-between pt-3 mt-1 border-t-2 border-gray-100"><span className="text-gray-900 font-black">UTILIDAD NETA</span><span className="font-black text-green-600">{formatMoney(dre.lucroLiquido)}</span></div>
               </div>
            </div>
 
            {/* Top Despesas */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col items-center hover:shadow-md transition-shadow relative">
               <div className="w-full flex justify-between items-center mb-2">
-                 <h4 className="text-sm font-black text-gray-900">Top Despesas</h4>
+                 <h4 className="text-sm font-black text-gray-900">Top Gastos</h4>
               </div>
               {topExpensesData.length > 0 ? (
                  <>
@@ -764,9 +806,9 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
            <div>
               <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                 Olá, {userName}! <span className="text-2xl">👋</span>
+                 ¡Hola, {userName}! <span className="text-2xl">👋</span>
               </h1>
-              <p className="text-gray-500 font-medium text-sm mt-1">Seu mordomo financeiro está organizando suas finanças.</p>
+              <p className="text-gray-500 font-medium text-sm mt-1">Tu mayordomo financiero está organizando tus finanzas.</p>
            </div>
 
            <div className="flex items-center gap-4 bg-white p-2 rounded-full border border-gray-100 shadow-sm">
@@ -775,22 +817,53 @@ export default function Dashboard() {
                     onClick={() => toggleProfile('personal')}
                     className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${!isBusiness ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
                  >
-                    Pessoal
+                    Personal
                  </button>
                  <button 
                     onClick={() => toggleProfile('business')}
                     className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${isBusiness ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
                  >
-                    Empresarial
+                    Empresa
                  </button>
               </div>
 
-              <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors">
-                 <Bell className="w-5 h-5 text-gray-600" />
-                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-              </button>
+              <div className="relative">
+                 <button onClick={() => {setShowNotifications(!showNotifications); setShowProfileMenu(false);}} className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors">
+                    <Bell className="w-5 h-5 text-gray-600" />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                 </button>
+                 {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 shadow-xl rounded-2xl z-50 overflow-hidden">
+                       <div className="p-3 border-b border-gray-50 font-bold text-sm text-gray-800">Notificaciones</div>
+                       <div className="p-3 text-xs text-gray-500 hover:bg-gray-50 cursor-pointer">
+                          <p className="font-semibold text-gray-800">Factura Vencida</p>
+                          <p>Tu factura de luz vence hoy.</p>
+                       </div>
+                       <div className="p-3 text-xs text-gray-500 hover:bg-gray-50 cursor-pointer border-t border-gray-50">
+                          <p className="font-semibold text-gray-800">Meta Alcanzada</p>
+                          <p>¡Alcanzaste tu meta de ahorro!</p>
+                       </div>
+                    </div>
+                 )}
+              </div>
 
-              <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full border border-gray-200" />
+              <div className="relative">
+                 <img onClick={() => {setShowProfileMenu(!showProfileMenu); setShowNotifications(false);}} src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity" />
+                 {showProfileMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-2xl z-50 overflow-hidden">
+                       <div className="p-3 border-b border-gray-50">
+                          <p className="font-bold text-sm text-gray-800">{userName}</p>
+                          <p className="text-[10px] text-gray-500">Plan Premium</p>
+                       </div>
+                       <button onClick={() => navigate('/settings')} className="w-full text-left p-3 text-xs text-gray-600 font-semibold hover:bg-gray-50 transition-colors flex items-center gap-2">
+                          <Settings className="w-4 h-4"/> Configuración
+                       </button>
+                       <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="w-full text-left p-3 text-xs text-red-600 font-semibold hover:bg-red-50 transition-colors border-t border-gray-50 flex items-center gap-2">
+                          <LogOut className="w-4 h-4"/> Cerrar Sesión
+                       </button>
+                    </div>
+                 )}
+              </div>
            </div>
         </div>
 
@@ -799,22 +872,22 @@ export default function Dashboard() {
 
         {/* RODAPÉ COMPARTILHADO: AÇÕES RÁPIDAS */}
         <div className="pt-4 border-t border-gray-100">
-           <h4 className="text-sm font-black text-gray-900 mb-4">Ações Rápidas</h4>
+           <h4 className="text-sm font-black text-gray-900 mb-4">Acciones Rápidas</h4>
            <div className="flex flex-wrap gap-3">
               <button onClick={() => openNewTransaction('INCOME')} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors">
-                 <Plus className="w-4 h-4" /> Nova Receita
+                 <Plus className="w-4 h-4" /> Nuevo Ingreso
               </button>
               <button onClick={() => openNewTransaction('EXPENSE')} className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition-colors">
-                 <Minus className="w-4 h-4" /> Nova Despesa
+                 <Minus className="w-4 h-4" /> Nuevo Gasto
               </button>
               <button onClick={() => navigate('/bot')} className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold border border-purple-100 hover:bg-purple-100 transition-colors">
-                 <Mic className="w-4 h-4" /> Enviar Áudio
+                 <Mic className="w-4 h-4" /> Enviar Audio
               </button>
-              <button onClick={() => window.open('https://wa.me/5511999999999?text=Ol%C3%A1%20Alfred!', '_blank')} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20">
+              <button onClick={() => window.open('https://wa.me/5511999999999?text=Hola%20Alfred!', '_blank')} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20">
                  <MessageCircle className="w-4 h-4" /> Abrir WhatsApp
               </button>
               <button onClick={() => navigate('/reports')} className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
-                 <FileText className="w-4 h-4" /> Gerar Relatório
+                 <FileText className="w-4 h-4" /> Generar Reporte
               </button>
               <button onClick={handleExportCSV} className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold border border-gray-200 hover:bg-gray-100 transition-colors">
                  <Download className="w-4 h-4" /> Exportar CSV
@@ -828,22 +901,22 @@ export default function Dashboard() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4 fade-in font-sans">
           <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 p-10">
             <div className="flex justify-between items-center mb-8">
-               <h2 className="text-2xl font-black text-slate-800 tracking-tight">Novo Lançamento</h2>
+               <h2 className="text-2xl font-black text-slate-800 tracking-tight">Nuevo Lanzamiento</h2>
                <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center"><X className="text-slate-400 w-5 h-5"/></button>
             </div>
             
             <form onSubmit={handleCreateTx} className="space-y-6">
               <div className="flex gap-4 p-2 bg-slate-50 rounded-[2rem]">
-                 <button type="button" onClick={() => setSelectedType('INCOME')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'INCOME' ? 'bg-white text-green-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Receita</button>
-                 <button type="button" onClick={() => setSelectedType('EXPENSE')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'EXPENSE' ? 'bg-white text-red-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Despesa</button>
+                 <button type="button" onClick={() => setSelectedType('INCOME')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'INCOME' ? 'bg-white text-green-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Ingreso</button>
+                 <button type="button" onClick={() => setSelectedType('EXPENSE')} className={`flex-1 py-4 rounded-[1.8rem] text-xs font-black uppercase transition-all ${selectedType === 'EXPENSE' ? 'bg-white text-red-600 shadow-md transform scale-105' : 'text-slate-400'}`}>Gasto</button>
               </div>
 
-              <input required value={description} onChange={(e) => setDescription(e.target.value)} type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-sm font-black focus:border-blue-500 outline-none transition-all shadow-inner" placeholder="Especifique o gasto ou receita" />
+              <input required value={description} onChange={(e) => setDescription(e.target.value)} type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-sm font-black focus:border-blue-500 outline-none transition-all shadow-inner" placeholder="Especifique el ingreso o gasto" />
               <input required value={amount} onChange={(e) => setAmount(e.target.value)} type="number" step="0.01" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-sm font-black focus:border-blue-500 outline-none transition-all shadow-inner" placeholder={`${userCurrency} 0.00`} />
               <input required value={txDate} onChange={(e) => setTxDate(e.target.value)} type="date" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-xs font-black outline-none transition-all shadow-inner" />
 
               <button type="submit" className="w-full bg-slate-900 text-white font-black py-6 rounded-[3rem] shadow-xl hover:bg-black transition-all active:scale-95 text-lg uppercase tracking-tight">
-                Efetivar Lançamento 🏛️
+                Registrar Lanzamiento 🏛️
               </button>
             </form>
           </div>

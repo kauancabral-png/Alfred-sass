@@ -156,7 +156,7 @@ export const handleIncomingMessage = async (fromNumber: string, messageBody: str
             });
             
             console.log(`✅ [SUCESSO]: ID ${txn.id} no perfil ${targetProfile.id}`);
-            return `¡Anotado en el perfil *${targetProfile.name}*! 🕵️‍♂️🎩\n${parsed.type === 'INCOME' ? '📈 Ingreso' : '📉 Gasto'}: R$ ${parsed.amount.toLocaleString('pt-BR')} en "${parsed.description}".\nCategoría AI: *${txn.category?.name || 'General'}*\n\n¡Abre tu Dashboard ahora, todo fue sincronizado! 😉`;
+            return `¡Anotado en el perfil *${targetProfile.name}*! 🕵️‍♂️🎩\n${parsed.type === 'INCOME' ? '📈 Ingreso' : '📉 Gasto'}: $ ${parsed.amount.toLocaleString('es-LA', { minimumFractionDigits: 2 })} en "${parsed.description}".\nCategoría AI: *${txn.category?.name || 'General'}*\n\n¡Abre tu Dashboard ahora, todo fue sincronizado! 😉`;
         }
 
         return `Perdón, ${user.gender === "feminino" ? 'Señora' : 'Señor'}. 🫠 No identifiqué el valor exacto de la operación. 
