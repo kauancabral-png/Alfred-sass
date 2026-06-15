@@ -539,7 +539,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
            {/* Faturamento Bruto */}
            <div className="bg-white rounded-[1.5rem] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[160px] relative">
-              <div className="absolute top-6 right-6 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <div className="absolute top-6 right-6 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
                  <ArrowUp className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -547,7 +547,7 @@ export default function Dashboard() {
                  <h2 className="text-2xl font-black text-gray-900">{formatMoney(dre.receitaBruta)}</h2>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30">
-                 <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full text-blue-500" fill="currentColor">
+                 <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full text-green-500" fill="currentColor">
                     <path d="M0,30 L0,15 Q10,5 20,15 T40,15 T60,10 T80,20 T100,5 L100,30 Z" />
                  </svg>
               </div>
@@ -608,7 +608,7 @@ export default function Dashboard() {
                  <h3 className="text-lg font-black text-gray-900">Fluxo de Caixa Empresarial</h3>
                  <div className="flex items-center gap-4">
                     <div className="hidden md:flex items-center gap-3 mr-4">
-                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Entradas</span>
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-green-500"></div> Entradas</span>
                        <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-red-500"></div> Saídas</span>
                        <span className="flex items-center gap-1 text-[10px] font-bold text-gray-500"><div className="w-2 h-2 rounded-full bg-purple-500"></div> Saldo</span>
                     </div>
@@ -624,7 +624,7 @@ export default function Dashboard() {
                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} dy={10} />
                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 600}} tickFormatter={(val) => `R$ ${val/1000}k`} />
                        <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
-                       <Line type="monotone" dataKey="Entradas" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                       <Line type="monotone" dataKey="Entradas" stroke="#22c55e" strokeWidth={3} dot={false} />
                        <Line type="monotone" dataKey="Saidas" stroke="#ef4444" strokeWidth={3} dot={false} />
                        <Line type="monotone" dataKey="Saldo" stroke="#8b5cf6" strokeWidth={3} dot={false} />
                     </LineChart>
@@ -640,11 +640,11 @@ export default function Dashboard() {
                        <h3 className="text-sm font-black text-gray-900">Contas a Receber</h3>
                        <p className="text-[11px] text-gray-500 font-medium">Total a receber (Previsto)</p>
                     </div>
-                    <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md">{billsToReceive.length} títulos</span>
+                    <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-md">{billsToReceive.length} títulos</span>
                  </div>
                  <h2 className="text-2xl font-black text-gray-900 mb-4">{formatMoney(totalToReceive)}</h2>
                  <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden mb-2">
-                    <div className="bg-blue-500 h-full rounded-full" style={{ width: '45%' }}></div>
+                    <div className="bg-green-500 h-full rounded-full" style={{ width: '45%' }}></div>
                  </div>
                  <p className="text-[10px] text-gray-400 font-medium text-right">A vencer próximos 7 dias</p>
               </div>
@@ -779,7 +779,7 @@ export default function Dashboard() {
                  </button>
                  <button 
                     onClick={() => toggleProfile('business')}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${isBusiness ? 'bg-white text-blue-600 shadow-sm border border-blue-100' : 'text-gray-400 hover:text-gray-700'}`}
+                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${isBusiness ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
                  >
                     Empresarial
                  </button>
