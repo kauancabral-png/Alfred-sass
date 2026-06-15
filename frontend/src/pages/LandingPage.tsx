@@ -115,7 +115,7 @@ export default function LandingPage() {
          <div className="reveal relative w-full max-w-[320px] mx-auto mt-4 md:mt-10">
             
             {/* Notification 1: Comida (Floating Outside Left) */}
-            <div className="absolute top-24 -left-[20%] md:-left-[40%] z-30 bg-[#111] border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float min-w-[240px] md:min-w-[280px]">
+            <div className="absolute bottom-32 -left-[15%] md:-left-[35%] z-30 bg-[#111] border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float min-w-[240px] md:min-w-[280px]">
                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white shrink-0">
                      <Utensils className="w-5 h-5" />
@@ -129,7 +129,7 @@ export default function LandingPage() {
             </div>
 
             {/* Notification 2: Hospedagem (Floating Outside Right) */}
-            <div className="absolute top-52 -right-[15%] md:-right-[35%] z-30 bg-[#111]/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float-delayed min-w-[240px] md:min-w-[280px]">
+            <div className="absolute bottom-8 -right-[10%] md:-right-[25%] z-30 bg-[#111]/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-4 shadow-2xl shadow-black/80 animate-float-delayed min-w-[240px] md:min-w-[280px]">
                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white shrink-0">
                      <Home className="w-5 h-5" />
