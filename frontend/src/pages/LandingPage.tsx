@@ -327,18 +327,15 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-black mb-6 text-white tracking-tight">Míralo en acción</h2>
             <p className="text-neutral-400 text-lg mb-10 font-medium max-w-2xl mx-auto">Descubre cómo Alfred categoriza gastos y responde a tus comandos por WhatsApp en tiempo real.</p>
             
-            <div className="relative w-full aspect-video bg-[#111] rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-[0_0_50px_rgba(34,197,94,0.15)] overflow-hidden group cursor-pointer">
-               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10"></div>
-               {/* Play Button Overlay */}
-               <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <div className="w-20 h-20 md:w-24 md:h-24 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.6)] group-hover:scale-110 transition-transform duration-300">
-                     <svg className="w-8 h-8 md:w-10 md:h-10 text-black translate-x-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-               </div>
-               {/* Cover Image Placeholder */}
-               <img src="/feature_lifestyle_1.png" alt="Video Cover" className="w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:opacity-80 transition-opacity duration-500 group-hover:scale-105 transform" />
+            <div className="relative w-full aspect-[9/16] md:aspect-video bg-[#111] rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-[0_0_50px_rgba(34,197,94,0.15)] overflow-hidden group">
+               <iframe 
+                  src="https://player.vimeo.com/video/1202304487?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0" 
+                  className="absolute top-0 left-0 w-full h-full" 
+                  frameBorder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture" 
+                  allowFullScreen
+               ></iframe>
             </div>
-            <p className="text-neutral-500 text-xs font-bold uppercase tracking-widest mt-6">Duración: 1 min 12 seg</p>
          </div>
       </section>
 
