@@ -230,50 +230,49 @@ export default function LandingPage() {
       </section>
 
       {/* Feature 1 */}
-      <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
-         <div className="reveal flex-1 text-center md:text-left">
-            <h3 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">¿Sorpresas en la factura? Conmigo, no.</h3>
-            <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Sé lo que es abrir la factura y no entender nada. Alfred analiza tus gastos y te avisa antes de que pierdas el control.</p>
-            <button onClick={scrollToPricing} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
+      <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
+         <div className="reveal flex-1 w-full flex justify-center order-2 md:order-1 relative">
+             <div className="relative w-full max-w-[400px] rounded-[2.5rem] overflow-hidden group">
+                 <img src="/feature_lifestyle_1.png" alt="Usuario Alfred" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                 {/* Floating UI Element */}
+                 <div className="absolute bottom-6 left-6 right-6 z-10 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-2xl">
+                    <div className="flex items-center justify-between mb-2">
+                       <p className="text-xs font-bold text-neutral-400 uppercase">Alerta de Gasto</p>
+                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                    </div>
+                    <p className="text-red-400 font-black text-2xl tracking-tighter">-$ 42.00</p>
+                 </div>
+             </div>
+         </div>
+         <div className="reveal flex-1 text-left order-1 md:order-2">
+            <h3 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">¿Sorpresas en la factura? Conmigo, no.</h3>
+            <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Sé lo que es abrir la factura y no entender nada. Alfred analiza tus gastos en tiempo real y te avisa antes de que pierdas el control.</p>
+            <button onClick={scrollToPricing} className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors">
                Descubrir sorpresas
             </button>
-         </div>
-         <div className="reveal flex-1 w-full flex justify-center mt-6 md:mt-0">
-             <div className="w-full max-w-[320px] bg-[#111] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/10 rounded-full blur-[60px] -mr-10 -mt-10"></div>
-                <div className="relative z-10">
-                   <h4 className="text-2xl font-black text-white mb-2">Alerta de Gasto</h4>
-                   <p className="text-neutral-400 text-sm mb-6">Gasto inusual detectado.</p>
-                </div>
-                <div className="relative z-10 bg-[#1a1a1a] border border-white/5 p-5 rounded-2xl shadow-lg">
-                   <p className="text-red-400 font-black text-3xl mb-2 tracking-tighter">-$ 42.00</p>
-                   <p className="text-xs font-bold text-neutral-500 uppercase">Uber - Hoy</p>
-                </div>
-            </div>
          </div>
       </section>
 
       {/* Feature 2 */}
-      <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-4xl mx-auto flex flex-col md:flex-row-reverse items-center gap-10 md:gap-16 bg-[#000000]">
-         <div className="reveal flex-1 text-center md:text-left">
-            <h3 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">Te muestro hacia dónde va tu dinero.</h3>
-            <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Categorización automática con Inteligencia Artificial. Encuentro patrones para que ahorres sin sufrir.</p>
-            <button onClick={scrollToPricing} className="bg-white text-black px-6 md:px-8 py-3.5 md:py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors mx-auto md:mx-0 block">
+      <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-5xl mx-auto flex flex-col md:flex-row-reverse items-center gap-10 md:gap-16 bg-[#000000]">
+         <div className="reveal flex-1 w-full flex justify-center order-2 md:order-1 relative">
+             <div className="relative w-full max-w-[400px] rounded-[2.5rem] overflow-hidden group">
+                 <img src="/feature_lifestyle_2.png" alt="Ahorro Inteligente" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                 {/* Floating UI Element */}
+                 <div className="absolute top-6 left-6 z-10 bg-[#1a1a1a]/90 backdrop-blur-md border border-green-500/20 p-5 rounded-2xl shadow-2xl">
+                    <p className="text-xs font-bold text-neutral-400 uppercase mb-1">Ahorro detectado</p>
+                    <p className="text-green-400 font-black text-2xl tracking-tighter">+$ 15.00</p>
+                 </div>
+             </div>
+         </div>
+         <div className="reveal flex-1 text-left order-1 md:order-2">
+            <h3 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 text-white leading-[1.1] tracking-tight">Te muestro hacia dónde va tu dinero.</h3>
+            <p className="text-neutral-400 text-base md:text-lg mb-6 md:mb-8 leading-relaxed font-medium">Categorización automática con Inteligencia Artificial. Encuentro patrones oscuros en tus compras para que ahorres sin sufrir.</p>
+            <button onClick={scrollToPricing} className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm hover:bg-neutral-200 transition-colors">
                Categorizar gastos
             </button>
-         </div>
-         <div className="reveal flex-1 w-full flex justify-center mt-6 md:mt-0">
-             <div className="w-full max-w-[320px] bg-[#111] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden group">
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-green-500/10 rounded-full blur-[60px] -ml-10 -mb-10"></div>
-                <div className="relative z-10">
-                   <h4 className="text-2xl font-black text-white mb-2">Ahorro Inteligente</h4>
-                   <p className="text-neutral-400 text-sm mb-6">Suscripciones sin uso.</p>
-                </div>
-                <div className="relative z-10 bg-[#1a1a1a] border border-white/5 p-5 rounded-2xl shadow-lg">
-                   <p className="text-green-400 font-black text-3xl mb-2 tracking-tighter">+$ 15.00</p>
-                   <p className="text-xs font-bold text-neutral-500 uppercase">Netflix Duplicado</p>
-                </div>
-            </div>
          </div>
       </section>
 
@@ -350,10 +349,16 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonios */}
-      <section className="py-16 md:py-24 px-6 bg-[#000000] overflow-hidden">
+      <section className="py-16 md:py-24 px-6 bg-[#000000] overflow-hidden relative">
          <div className="max-w-6xl mx-auto reveal">
-            <h2 className="text-3xl md:text-5xl font-black mb-12 md:mb-16 text-center text-white tracking-tight">Testimonios</h2>
-            <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <h2 className="text-3xl md:text-5xl font-black mb-8 md:mb-12 text-center text-white tracking-tight">Testimonios</h2>
+            
+            <div className="md:hidden flex items-center justify-center gap-2 mb-6 text-neutral-500 animate-pulse">
+               <span className="text-xs font-bold uppercase tracking-widest">Desliza para ver más</span>
+               <span className="text-lg">👉</span>
+            </div>
+
+            <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar pl-4 md:pl-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
 
                <div className="shrink-0 w-[85vw] max-w-[420px] snap-center bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[350px]">
@@ -381,21 +386,21 @@ export default function LandingPage() {
                </div>
 
                <div className="shrink-0 w-[85vw] max-w-[420px] snap-center bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[350px]">
-                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-[50px] -ml-10 -mb-10 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-[50px] group-hover:bg-green-500/10 transition-colors duration-500"></div>
                   <div>
                     <div className="flex gap-1 mb-6 md:mb-8 text-yellow-400 relative z-10">
                       <Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" />
                     </div>
                     <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-8 md:mb-10 relative z-10 group-hover:text-green-50 transition-colors">
-                       "El hecho de separar el dinero personal del de la empresa de forma automática es un salvavidas. Ojalá hubiera conocido a Alfred antes de mezclar mis finanzas."
+                       "Lo que más me gusta es poder enviar un audio al WhatsApp diciendo cuánto gasté y él se encarga del resto. Es pura magia negra tecnológica."
                     </p>
                   </div>
                   <div className="flex justify-between items-center relative z-10 border-t border-white/5 pt-6 mt-auto">
                      <div className="flex items-center gap-3 md:gap-4">
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-rose-400 to-orange-500 flex items-center justify-center font-bold text-white text-base md:text-lg">L</div>
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-purple-400 to-indigo-500 flex items-center justify-center font-bold text-white text-base md:text-lg">M</div>
                         <div>
-                           <p className="font-bold text-white text-sm md:text-base">Laura C.</p>
-                           <p className="text-[10px] md:text-xs text-neutral-400">Emprendedora</p>
+                           <p className="font-bold text-white text-sm md:text-base">Miguel T.</p>
+                           <p className="text-[10px] md:text-xs text-neutral-400">Freelancer</p>
                         </div>
                      </div>
                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
@@ -403,6 +408,55 @@ export default function LandingPage() {
                      </div>
                   </div>
                </div>
+
+               <div className="shrink-0 w-[85vw] max-w-[420px] snap-center bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[350px]">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-[50px] -mr-10 -mt-10 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <div>
+                    <div className="flex gap-1 mb-6 md:mb-8 text-yellow-400 relative z-10">
+                      <Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+                    </div>
+                    <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-8 md:mb-10 relative z-10 group-hover:text-green-50 transition-colors">
+                       "El panel de control es hermoso y carga al instante. Pude identificar gastos ocultos en suscripciones que ni recordaba que tenía."
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center relative z-10 border-t border-white/5 pt-6 mt-auto">
+                     <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-400 to-red-500 flex items-center justify-center font-bold text-white text-base md:text-lg">S</div>
+                        <div>
+                           <p className="font-bold text-white text-sm md:text-base">Sofía R.</p>
+                           <p className="text-[10px] md:text-xs text-neutral-400">Consultora</p>
+                        </div>
+                     </div>
+                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="shrink-0 w-[85vw] max-w-[420px] snap-center bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/10 hover:border-white/20 transition-all hover:-translate-y-2 duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[350px]">
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-[50px] -ml-10 -mb-10 group-hover:bg-green-500/10 transition-colors duration-500"></div>
+                  <div>
+                    <div className="flex gap-1 mb-6 md:mb-8 text-yellow-400 relative z-10">
+                      <Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" /><Star className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+                    </div>
+                    <p className="text-white font-bold text-lg md:text-xl leading-relaxed tracking-tight mb-8 md:mb-10 relative z-10 group-hover:text-green-50 transition-colors">
+                       "Nunca he sido bueno con los números, pero Alfred lo hace todo tan intuitivo que ahora me emociona ver cómo va mi DRE a fin de mes."
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center relative z-10 border-t border-white/5 pt-6 mt-auto">
+                     <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-white text-base md:text-lg">J</div>
+                        <div>
+                           <p className="font-bold text-white text-sm md:text-base">Javier P.</p>
+                           <p className="text-[10px] md:text-xs text-neutral-400">Dueño de Comercio</p>
+                        </div>
+                     </div>
+                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                     </div>
+                  </div>
+               </div>
+
             </div>
          </div>
       </section>
@@ -454,13 +508,16 @@ export default function LandingPage() {
       </section>
 
       {/* Guarantee (NEW) */}
-      <section className="py-16 px-6 max-w-3xl mx-auto reveal text-center">
-         <div className="bg-[#111] border border-white/10 rounded-[2.5rem] p-10 flex flex-col items-center shadow-xl">
-            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white/10">
-               <span className="text-3xl">🛡️</span>
+      <section className="py-16 px-6 max-w-4xl mx-auto reveal text-center">
+         <div className="bg-[#111] border border-white/10 rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center gap-10 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -mr-20 -mt-20"></div>
+            <div className="md:w-1/3 flex justify-center relative z-10">
+               <img src="/guarantee_badge.png" alt="7 Días de Garantía" className="w-48 h-48 object-contain hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]" />
             </div>
-            <h3 className="text-2xl md:text-3xl font-black text-white mb-4 tracking-tight">Garantía incondicional de 7 días</h3>
-            <p className="text-neutral-400 text-sm md:text-base leading-relaxed font-medium">Usa Alfred durante 7 días enteros. Conéctalo, hazle preguntas en WhatsApp y ve cómo categoriza tus gastos. Si no crees que te ahorra horas de estrés e incrementa tu control financiero, te devolvemos el 100% de tu inversión. Sin preguntas, sin burocracia.</p>
+            <div className="md:w-2/3 text-left relative z-10">
+               <h3 className="text-2xl md:text-4xl font-black text-white mb-4 tracking-tight">Garantía incondicional de 7 días</h3>
+               <p className="text-neutral-400 text-sm md:text-base leading-relaxed font-medium">Usa Alfred durante 7 días enteros. Conéctalo, hazle preguntas en WhatsApp y ve cómo categoriza tus gastos. Si no crees que te ahorra horas de estrés e incrementa tu control financiero, te devolvemos el 100% de tu inversión. Sin preguntas, sin burocracia.</p>
+            </div>
          </div>
       </section>
 
