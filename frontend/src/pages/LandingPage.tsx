@@ -489,6 +489,86 @@ export default function LandingPage() {
          </div>
       </section>
 
+      {/* Bonos Especiales */}
+      <section id="bonos" className="py-16 md:py-24 px-6 bg-[#0a0a0a] border-t border-white/5">
+         <div className="max-w-5xl mx-auto reveal">
+            <div className="text-center mb-12 md:mb-16">
+               <div className="inline-flex items-center gap-2 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-4 py-2 rounded-full text-xs font-bold mb-4">
+                  <Star className="w-3 h-3 fill-current" /> Solo por hoy
+               </div>
+               <h2 className="text-3xl md:text-5xl font-black mb-4 text-white tracking-tight">Lleva 4 Bonos Exclusivos de Regalo</h2>
+               <p className="text-neutral-400 text-base md:text-lg max-w-2xl mx-auto font-medium">Llevando tu licencia vitalicia hoy, te llevas todo este paquete de herramientas complementarias sin pagar un centavo extra.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+               {/* Bono 1 */}
+               <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
+                  <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
+                     <img src="/bonus_mockup_1.png" alt="Guía de Impuestos" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="text-center md:text-left">
+                     <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #1</div>
+                     <h3 className="text-xl font-bold text-white mb-2 leading-tight">Guía de Impuestos Personales y Agencia</h3>
+                     <p className="text-neutral-400 text-xs md:text-sm mb-4 leading-relaxed">El paso a paso para optimizar tus declaraciones y dejar de perder dinero con el fisco legalmente.</p>
+                     <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span className="text-neutral-500 line-through text-sm font-bold">$47.00</span>
+                        <span className="text-green-400 font-black">¡GRATIS!</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Bono 2 */}
+               <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
+                  <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
+                     <img src="/bonus_mockup_2.png" alt="Control de deudas" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="text-center md:text-left">
+                     <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #2</div>
+                     <h3 className="text-xl font-bold text-white mb-2 leading-tight">Control de Deudas</h3>
+                     <p className="text-neutral-400 text-xs md:text-sm mb-4 leading-relaxed">Un panel financiero definitivo para liquidar tus deudas más rápido usando el método avalancha.</p>
+                     <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span className="text-neutral-500 line-through text-sm font-bold">$29.00</span>
+                        <span className="text-green-400 font-black">¡GRATIS!</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Bono 3 */}
+               <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
+                  <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
+                     <img src="/bonus_mockup_3.png" alt="Metas de vida" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="text-center md:text-left">
+                     <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #3</div>
+                     <h3 className="text-xl font-bold text-white mb-2 leading-tight">Metas de Vida</h3>
+                     <p className="text-neutral-400 text-xs md:text-sm mb-4 leading-relaxed">Convierte tus sueños en cifras reales y crea un plan exacto de cuánto necesitas ahorrar mensualmente.</p>
+                     <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span className="text-neutral-500 line-through text-sm font-bold">$35.00</span>
+                        <span className="text-green-400 font-black">¡GRATIS!</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Bono 4 */}
+               <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
+                  <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl relative">
+                     <div className="absolute inset-0 bg-yellow-500/20 mix-blend-overlay"></div>
+                     <img src="/bonus_mockup_4.png" alt="Acceso vitalicio" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="text-center md:text-left">
+                     <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #4</div>
+                     <h3 className="text-xl font-bold text-white mb-2 leading-tight">Actualizaciones de por Vida</h3>
+                     <p className="text-neutral-400 text-xs md:text-sm mb-4 leading-relaxed">El pase VIP. Acceso sin costo a todas las nuevas inteligencias artificiales que agreguemos a Alfred.</p>
+                     <div className="flex items-center justify-center md:justify-start gap-2">
+                        <span className="text-neutral-500 line-through text-sm font-bold">$197.00</span>
+                        <span className="text-green-400 font-black">¡INVALUABLE!</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+
       {/* Pricing with Anchoring, Scarcity and Bonuses */}
       <section id="planes-y-precios" className="py-16 md:py-24 px-6 bg-[#050505] border-t border-white/5">
          <div className="max-w-sm md:max-w-md mx-auto reveal text-center">
@@ -523,9 +603,11 @@ export default function LandingPage() {
 
                {/* Bonuses highlighted */}
                <div className="pt-6 mt-6 border-t border-white/5 mb-8">
-                  <p className="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Incluye Bonos Especiales:</p>
-                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0"/> <span className="text-sm font-bold text-white">Guía de Impuestos Personales y Agencia</span></div>
-                  <div className="flex items-start gap-3"><Star className="w-5 h-5 text-yellow-400 shrink-0"/> <span className="text-sm font-bold text-white">Acceso Prioritario a nuevas funciones IA</span></div>
+                  <p className="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Incluye 4 Bonos Especiales:</p>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 1: Guía de Impuestos Personales y Agencia</span></div>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 2: Control de Deudas</span></div>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 3: Metas de Vida</span></div>
+                  <div className="flex items-start gap-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 4: Actualizaciones de por Vida</span></div>
                </div>
 
                <button onClick={handleCheckout} className="w-full py-3.5 md:py-4 rounded-full font-black text-sm md:text-base text-center bg-green-500 text-black hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(34,197,94,0.4)]">
