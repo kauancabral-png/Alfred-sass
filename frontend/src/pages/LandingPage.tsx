@@ -34,7 +34,7 @@ export default function LandingPage() {
   };
 
   const scrollToHowItWorks = () => {
-    document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('video-demo')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToPricing = () => {
@@ -319,23 +319,30 @@ export default function LandingPage() {
       </section>
 
       {/* Video Demonstrativo (NEW) */}
-      <section className="py-16 md:py-24 px-6 bg-[#000000] border-t border-white/5">
-         <div className="max-w-4xl mx-auto reveal text-center">
+      <section id="video-demo" className="py-16 md:py-24 px-6 bg-[#000000] border-t border-white/5">
+         <div className="max-w-4xl mx-auto reveal text-center flex flex-col items-center">
             <div className="inline-flex items-center gap-2 bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-2 rounded-full text-xs font-bold mb-6">
                <span className="animate-pulse">🔴</span> Mira la magia en vivo
             </div>
             <h2 className="text-3xl md:text-5xl font-black mb-6 text-white tracking-tight">Míralo en acción</h2>
             <p className="text-neutral-400 text-lg mb-10 font-medium max-w-2xl mx-auto">Descubre cómo Alfred categoriza gastos y responde a tus comandos por WhatsApp en tiempo real.</p>
             
-            <div className="relative w-full aspect-[9/16] md:aspect-video bg-[#111] rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-[0_0_50px_rgba(34,197,94,0.15)] overflow-hidden group">
-               <iframe 
-                  src="https://player.vimeo.com/video/1202304487?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0" 
-                  className="absolute top-0 left-0 w-full h-full" 
-                  frameBorder="0" 
-                  allow="autoplay; fullscreen; picture-in-picture" 
-                  allowFullScreen
-               ></iframe>
+            {/* Phone Mockup Frame for Video */}
+            <div className="relative w-full max-w-[320px] h-[600px] bg-[#0a0a0a] rounded-[3rem] border-[6px] border-[#1a1a1a] phone-mockup overflow-hidden flex flex-col shadow-[0_0_50px_rgba(34,197,94,0.15)] mx-auto">
+               <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-40">
+                  <div className="w-32 h-6 bg-[#1a1a1a] rounded-b-3xl"></div>
+               </div>
+               <div className="flex-1 w-full bg-[#000] relative flex items-center justify-center">
+                  <iframe 
+                     src="https://player.vimeo.com/video/1202304487?title=0&byline=0&portrait=0" 
+                     className="absolute top-0 left-0 w-full h-full" 
+                     frameBorder="0" 
+                     allow="autoplay; fullscreen; picture-in-picture" 
+                     allowFullScreen
+                  ></iframe>
+               </div>
             </div>
+            <p className="text-neutral-500 text-xs font-bold uppercase tracking-widest mt-8">Duración: 1 min 12 seg</p>
          </div>
       </section>
 
