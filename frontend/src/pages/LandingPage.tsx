@@ -233,7 +233,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
          <div className="reveal flex-1 w-full flex justify-center order-2 md:order-1 relative">
              <div className="relative w-full max-w-[400px] rounded-[2.5rem] overflow-hidden group">
-                 <img src="/feature_lifestyle_1.png" loading="lazy" alt="Usuario Alfred" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
+                 <img src="/feature_lifestyle_1.jpg" loading="lazy" alt="Usuario Alfred" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                  {/* Floating UI Element */}
                  <div className="absolute bottom-6 left-6 right-6 z-10 bg-[#1a1a1a]/90 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-2xl">
@@ -258,7 +258,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-24 px-6 max-w-lg md:max-w-5xl mx-auto flex flex-col md:flex-row-reverse items-center gap-10 md:gap-16 bg-[#000000]">
          <div className="reveal flex-1 w-full flex justify-center order-2 md:order-1 relative">
              <div className="relative w-full max-w-[400px] rounded-[2.5rem] overflow-hidden group">
-                 <img src="/feature_lifestyle_2.png" loading="lazy" alt="Ahorro Inteligente" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
+                 <img src="/feature_lifestyle_2.jpg" loading="lazy" alt="Ahorro Inteligente" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 mix-blend-luminosity hover:mix-blend-normal" />
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                  {/* Floating UI Element */}
                  <div className="absolute top-6 left-6 z-10 bg-[#1a1a1a]/90 backdrop-blur-md border border-green-500/20 p-5 rounded-2xl shadow-2xl">
@@ -299,7 +299,7 @@ export default function LandingPage() {
                         <p className="text-[11px] text-green-400 font-semibold">En línea</p>
                      </div>
                   </div>
-                  <div className="flex-1 p-5 flex flex-col gap-6 overflow-y-auto bg-[url('https://i.pinimg.com/1200x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg')] bg-cover bg-center bg-blend-overlay bg-black/90">
+                  <div className="flex-1 p-5 flex flex-col gap-6 overflow-y-auto bg-[url('/bg-chat.jpg')] bg-cover bg-center bg-blend-overlay bg-black/90">
                      <div className="bg-[#202c33] p-4 rounded-2xl rounded-tl-none self-start max-w-[90%] shadow-md border border-white/5">
                         <p className="text-white text-sm leading-relaxed">Encontré un pago de $150 en "Material de oficina". ¿Es de la Empresa?</p>
                         <p className="text-[10px] text-neutral-400 text-right mt-1">14:02</p>
@@ -504,7 +504,7 @@ export default function LandingPage() {
                {/* Bono 1 */}
                <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
                   <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
-                     <img src="/bonus_mockup_1.png" loading="lazy" alt="Guía de Impuestos" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                     <img src="/bonus_mockup_1.jpg" loading="lazy" alt="Guía de Impuestos" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div className="text-center md:text-left">
                      <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #1</div>
@@ -520,7 +520,7 @@ export default function LandingPage() {
                {/* Bono 2 */}
                <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
                   <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
-                     <img src="/bonus_mockup_2.png" loading="lazy" alt="Control de deudas" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                     <img src="/bonus_mockup_2.jpg" loading="lazy" alt="Control de deudas" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div className="text-center md:text-left">
                      <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #2</div>
@@ -536,7 +536,7 @@ export default function LandingPage() {
                {/* Bono 3 */}
                <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
                   <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl">
-                     <img src="/bonus_mockup_3.png" loading="lazy" alt="Metas de vida" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                     <img src="/bonus_mockup_3.jpg" loading="lazy" alt="Metas de vida" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div className="text-center md:text-left">
                      <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #3</div>
@@ -553,7 +553,7 @@ export default function LandingPage() {
                <div className="bg-[#111] rounded-[2rem] p-6 md:p-8 border border-white/10 flex flex-col md:flex-row gap-6 items-center shadow-xl hover:border-yellow-500/30 transition-colors group">
                   <div className="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-[#000] rounded-2xl overflow-hidden shadow-2xl relative">
                      <div className="absolute inset-0 bg-yellow-500/20 mix-blend-overlay"></div>
-                     <img src="/bonus_mockup_4.png" loading="lazy" alt="Acceso vitalicio" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                     <img src="/bonus_mockup_4.jpg" loading="lazy" alt="Acceso vitalicio" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div className="text-center md:text-left">
                      <div className="text-yellow-400 font-black text-sm uppercase tracking-widest mb-2">Bono #4</div>
