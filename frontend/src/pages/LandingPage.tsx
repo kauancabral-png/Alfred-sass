@@ -111,10 +111,13 @@ export default function LandingPage() {
             Deja que Alfred lo organice.
          </h1>
          
-         <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mb-8 md:mb-10 reveal leading-relaxed font-medium">
-            Todo lo que entra y sale de tu cuenta, organizado de forma automática e inteligente. Sin hojas de cálculo, sin sorpresas.
-         </p>
-
+         <div className="text-neutral-400 text-base md:text-lg max-w-2xl mb-8 md:mb-10 reveal leading-relaxed font-medium space-y-3">
+            <p className="text-white font-bold bg-green-500/10 border border-green-500/20 px-4 py-2 rounded-xl inline-block mb-2">
+               🔒 Alfred NO te pide conectar cuentas bancarias ni contraseñas.
+            </p>
+            <p>Registra tus gastos e ingresos directamente por WhatsApp 📲</p>
+            <p>Sin complicaciones, sin planillas difíciles. Simple, práctico y pensado para tu rutina.</p>
+         </div>
          <button onClick={scrollToHowItWorks} className="reveal bg-white text-black px-8 py-3.5 rounded-full font-bold text-sm md:text-base hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)] mb-12 md:mb-16">
             Conoce cómo funciona
          </button>
