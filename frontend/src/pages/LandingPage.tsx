@@ -333,6 +333,7 @@ export default function LandingPage() {
                </div>
                <div className="flex-1 w-full bg-[#000] relative flex items-center justify-center">
                   <iframe 
+                     loading="lazy"
                      src="https://player.vimeo.com/video/1202304487?title=0&byline=0&portrait=0" 
                      className="absolute top-0 left-0 w-full h-full" 
                      frameBorder="0" 
