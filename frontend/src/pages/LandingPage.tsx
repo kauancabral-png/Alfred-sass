@@ -98,9 +98,9 @@ export default function LandingPage() {
             <img src="/logo-alfred-white.png" alt="Alfred" className="h-5 md:h-6 object-contain" />
          </div>
          <div className="flex items-center gap-4">
-            <NavLink to="/login" className="hidden md:block font-medium text-sm text-neutral-400 hover:text-white transition-colors">
+            <a href="https://alfred-saas-premium.vercel.app/login" className="hidden md:block font-medium text-sm text-neutral-400 hover:text-white transition-colors">
                Entrar
-            </NavLink>
+            </a>
          </div>
       </nav>
 

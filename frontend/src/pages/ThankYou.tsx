@@ -15,11 +15,11 @@ export default function ThankYouPage() {
         </h1>
         
         <p className="text-lg text-slate-600 mb-10 leading-relaxed font-bold italic">
-          Seja bem-vindo ao time, Mestre! Acesse o Alfred em <a href="https://www.seualfred.site/login" className="text-blue-600 underline font-black">seualfred.site/login</a> usando seu e-mail de compra. Sua senha inicial é: <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-900">alfred123</span>.
+          Seja bem-vindo ao time, Mestre! Acesse o Alfred em <a href="https://alfred-saas-premium.vercel.app/login" className="text-blue-600 underline font-black">alfred-saas-premium.vercel.app/login</a> usando seu e-mail de compra. Sua senha inicial é: <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-900">alfred123</span>.
         </p>
 
         <a 
-          href="https://www.seualfred.site/login"
+          href="https://alfred-saas-premium.vercel.app/login"
           className="w-full bg-slate-900 hover:bg-black text-white font-black py-6 px-8 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 text-center flex items-center justify-center gap-3 text-xl uppercase tracking-tight"
         >
           Acessar Agora <ArrowRight className="w-6 h-6" />
