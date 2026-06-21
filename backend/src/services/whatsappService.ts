@@ -7,13 +7,28 @@ import OpenAI from 'openai';
 async function alfredParse(message: string, categoriesStr: string): Promise<{ description: string, amount: number, type: 'INCOME' | 'EXPENSE', profile: 'PERSONAL' | 'BUSINESS', categoryName?: string } | null> {
     const text = message.toLowerCase().trim();
     
-    // 1. TENTAR IA (GROQ) PRIMEIRO PARA OBTER A CATEGORIA INTELIGENTE
+    // 1. TENTAR IA (GROQ) PRIMEIRO COM PROMPT AVANÇADO DE NLP FINANCEIRO
     if (process.env.GROQ_API_KEY) {
         try {
             const groq = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: "https://api.groq.com/openai/v1" });
-            const prompt = `JSON ONLY: Analyze this message: "${message}". Format: {"description":"desc","amount":num,"type":"INCOME|EXPENSE","profile":"PERSONAL|BUSINESS","categoryName":"..."}. You MUST assign an appropriate category from this exact list: [${categoriesStr}]. If none fit, return a short new category name. Extract numbers properly.`;
+            const systemPrompt = `You are an expert financial AI parsing audio transcriptions.
+Your goal is to extract financial transactions from messy, casual spoken language (Portuguese/Spanish/English).
+
+RULES:
+1. AMOUNT: The user will often spell out numbers (e.g. "cinquenta e cinco reais", "trinta e dois e noventa", "cemzão", "un peso con cincuenta"). You MUST convert these spelled-out words into a clean float number (e.g., 55.00, 32.90, 100.00, 1.50). NEVER leave it as 0 if a number is spoken.
+2. TYPE: Map to "EXPENSE" if the user spent money (gastei, paguei, comprei, uber, ifood, mercado, pão). Map to "INCOME" if the user received money (recebi, vendi, caiu na conta, pix de fulano, salário).
+3. PROFILE: Map to "BUSINESS" if the context mentions company, negócio, empresa, pj, trabalho. Otherwise "PERSONAL".
+4. DESCRIPTION: Create a clean, short description (max 3 words). E.g. "gastei 50 no posto" -> "Posto de Gasolina". "comprei pão" -> "Padaria".
+5. CATEGORY: Choose the best fitting category from this exact list: [${categoriesStr}]. If none fit, create a short new one.
+
+Output MUST be strictly valid JSON matching this structure:
+{"description":"short desc", "amount": 10.50, "type":"INCOME"|"EXPENSE", "profile":"PERSONAL"|"BUSINESS", "categoryName":"..."}`;
+
             const response = await groq.chat.completions.create({
-                messages: [{ role: 'user', content: prompt }],
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: message }
+                ],
                 model: "llama-3.3-70b-versatile",
                 temperature: 0,
                 response_format: { type: "json_object" }
@@ -23,13 +38,13 @@ async function alfredParse(message: string, categoriesStr: string): Promise<{ de
         } catch (e) { console.error("❌ [BOT AI ERROR]:", e); }
     }
 
-    // 2. FALLBACK REGEX PURO (CASO A IA FALHE) 🧱
+    // 2. FALLBACK REGEX PURO (CASO A IA FALHE OU NÃO TENHA API KEY) 🧱
     const pureNumberMatch = text.match(/^(\d+[.,]?\d*)$/);
     if (pureNumberMatch) {
         return { description: 'Gasto rápido', amount: parseFloat(pureNumberMatch[1].replace(',', '.')), type: 'EXPENSE', profile: 'PERSONAL' };
     }
 
-    // 2. REGEX DE ELITE (FALHA ZERO) ⚔️
+    // 3. REGEX DE ELITE (FALHA ZERO) ⚔️
     const expenseRegex = /(gastei|gasté|gaste|paguei|pagué|compro|compré|despesa|gasto|menos|pagamento|-|saída|salida|custo|costo|pago|comi).*?(\d+[.,]?\d*)/i;
     const incomeRegex = /(recebi|recibí|ganhei|gané|entrou|entró|dinheiro|dinero|lucro|ingreso|\+|vendi|vendí|recebimento|reembolso|pix).*?(\d+[.,]?\d*)/i;
 
