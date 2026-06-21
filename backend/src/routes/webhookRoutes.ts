@@ -166,10 +166,13 @@ router.post('/whatsapp', express.urlencoded({ extended: true }), async (req: Req
                       if (fs.existsSync(tmpFile)) fs.unlinkSync(tmpFile);
                   } catch (audioErr: any) {
                       console.error("❌ [ERRO ÁUDIO]:", audioErr.message || audioErr);
-                      body = ""; 
+                      res.setHeader('Content-Type', 'text/xml');
+                      return res.send(`<Response><Message>❌ Error de Audio: ${audioErr.message}. Verifica tus variables de Twilio/Groq en Render.</Message></Response>`);
                   }
              } else {
                   console.error("⚠️ [GROQ_API_KEY] não configurada no servidor.");
+                  res.setHeader('Content-Type', 'text/xml');
+                  return res.send(`<Response><Message>❌ GROQ_API_KEY no configurada.</Message></Response>`);
              }
         }
 
