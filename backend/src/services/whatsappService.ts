@@ -6,6 +6,7 @@ import OpenAI from 'openai';
  */
 async function alfredParse(message: string, categoriesStr: string): Promise<{ description: string, amount: number, type: 'INCOME' | 'EXPENSE', profile: 'PERSONAL' | 'BUSINESS', categoryName?: string } | null> {
     const text = message.toLowerCase().trim();
+    if (!text) throw new Error("TEXT_EMPTY_TRANSCRIPTION_FAILED");
     
     // 1. TENTAR IA (GROQ) PRIMEIRO COM PROMPT AVANÇADO DE NLP FINANCEIRO
     if (process.env.GROQ_API_KEY) {
@@ -29,13 +30,17 @@ Output MUST be strictly valid JSON matching this structure:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: message }
                 ],
-                model: "llama-3.3-70b-versatile",
+                model: "llama-3.1-70b-versatile",
                 temperature: 0,
                 response_format: { type: "json_object" }
             });
             const result = JSON.parse(response.choices[0].message.content || '{}');
             if (result.amount && result.type) return result as any;
-        } catch (e) { console.error("❌ [BOT AI ERROR]:", e); }
+            throw new Error(`GROQ_RETURNED_INVALID_JSON: ${response.choices[0].message.content}`);
+        } catch (e: any) { 
+            console.error("❌ [BOT AI ERROR]:", e); 
+            throw new Error("GROQ_ERROR: " + e.message);
+        }
     }
 
     // 2. FALLBACK REGEX PURO (CASO A IA FALHE OU NÃO TENHA API KEY) 🧱
@@ -180,8 +185,8 @@ Intenta decir algo como:
 👉 *"Gasté 30 en el supermercado"* 
 👉 *"Recibí 500 de la venta de zapatos"*`;
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("🔥 [FATAL BOT ERROR]:", error);
-        return "Alfred tuvo un pequeño mareo técnico con el servidor. Siento mucho la demora, repítame por favor.";
+        return `Alfred tuvo un mareo técnico. ERROR DETALLE: ${error.message}. Repítame por favor.`;
     }
 };
