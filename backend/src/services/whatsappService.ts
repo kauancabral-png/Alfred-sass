@@ -30,7 +30,7 @@ Output MUST be strictly valid JSON matching this structure:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: message }
                 ],
-                model: "llama-3.1-70b-versatile",
+                model: "llama-3.3-70b-versatile",
                 temperature: 0,
                 response_format: { type: "json_object" }
             });
