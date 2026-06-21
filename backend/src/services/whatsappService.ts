@@ -30,7 +30,7 @@ Output MUST be strictly valid JSON matching this structure:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: message }
                 ],
-                model: "llama-3.3-70b-versatile",
+                model: "llama-3.1-8b-instant",
                 temperature: 0,
                 response_format: { type: "json_object" }
             });
@@ -88,14 +88,14 @@ export const handleIncomingMessage = async (fromNumber: string, messageBody: str
         console.log(`📡 [BOT INCOMING]: Recv from ${fromNumber} -> "${messageBody}"`);
         const pureIncomingPhone = fromNumber.replace(/\D/g, ''); 
 
-        // Localizar Usuário (Busca Global por Sufixo 9 Dígitos)
-        const allUsers = await prisma.user.findMany({ include: { profiles: true } });
-        const user = allUsers.find(u => {
-            const dbPhone = (u.phone || '').replace(/\D/g, '');
-            return (dbPhone.slice(-9) === pureIncomingPhone.slice(-9));
-        });
+        // Localizar Usuário Otimizado (Busca Leve)
+        const allUsersSlim = await prisma.user.findMany({ select: { id: true, phone: true } });
+        const matchedUserId = allUsersSlim.find(u => (u.phone || '').replace(/\D/g, '').slice(-9) === pureIncomingPhone.slice(-9))?.id;
+        
+        if (!matchedUserId) return "¡Hola! Habla Alfred. 🕵️‍♂️ Tu número de WhatsApp no está vinculado a ninguna cuenta en mi panel de control.";
 
-        if (!user) return "¡Hola! Habla Alfred. 🕵️‍♂️ Tu número de WhatsApp no está vinculado a ninguna cuenta en mi panel de control.";
+        const user = await prisma.user.findUnique({ where: { id: matchedUserId }, include: { profiles: true } });
+        if (!user) return "Error de carga.";
 
         // --- COMANDOS PRIORITÁRIOS ---
         const text = messageBody.toLowerCase().trim();
