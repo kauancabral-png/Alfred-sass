@@ -44,8 +44,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#000000] font-sans text-white selection:bg-white selection:text-black" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
         body {
           font-family: 'Inter', sans-serif;
           background-color: #000000;
@@ -594,7 +592,17 @@ export default function LandingPage() {
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Panel de control personalizado</span></div>
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Mayordomo en WhatsApp</span></div>
                   <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Perfil Empresarial y Personal</span></div>
-                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-neutral-600 shrink-0"/> <span className="text-sm font-medium text-neutral-500">Sin Bonos Exclusivos</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Soporte prioritario</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-green-400 shrink-0"/> <span className="text-sm font-bold text-white">Sin compromisos</span></div>
+               </div>
+
+               {/* Bonuses highlighted */}
+               <div className="pt-6 mt-6 border-t border-white/5 mb-8">
+                  <p className="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Incluye 4 Bonos Especiales:</p>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 1: Guía de Impuestos Personales y Agencia</span></div>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 2: Control de Deudas</span></div>
+                  <div className="flex items-start gap-3 mb-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 3: Metas de Vida</span></div>
+                  <div className="flex items-start gap-3"><Star className="w-5 h-5 text-yellow-400 shrink-0 fill-current"/> <span className="text-sm font-bold text-white leading-tight">Bono 4: Actualizaciones de por Vida</span></div>
                </div>
 
                <button onClick={() => {
