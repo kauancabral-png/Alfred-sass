@@ -580,7 +580,33 @@ export default function LandingPage() {
                <span>🔥</span> Licencias vitalicias limitadas a los primeros 500 fundadores.
             </div>
 
-            <div className="bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)] text-left relative overflow-hidden">
+            <div className="bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-white/10 text-left relative overflow-hidden mb-8 opacity-90 hover:opacity-100 transition-opacity">
+               <div className="inline-block bg-neutral-800 text-white text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-6 md:mb-8">Premium Anual</div>
+               <h3 className="text-xl md:text-2xl font-black text-white mb-2 md:mb-3">Alfred Mayordomo</h3>
+               <p className="text-neutral-400 text-xs md:text-sm font-medium mb-6">El asistente completo renovado anualmente.</p>
+               
+               <div className="flex items-end gap-1 mb-8">
+                  <span className="text-5xl md:text-6xl font-black text-white tracking-tighter">$14.90</span>
+                  <span className="text-neutral-500 font-bold text-sm mb-2">/ año</span>
+               </div>
+               
+               <div className="space-y-4 md:space-y-5 mb-8">
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Panel de control personalizado</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Mayordomo en WhatsApp</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-white opacity-80 shrink-0"/> <span className="text-sm font-medium text-neutral-300">Perfil Empresarial y Personal</span></div>
+                  <div className="flex items-start gap-3"><CheckCircle2 className="w-5 h-5 text-neutral-600 shrink-0"/> <span className="text-sm font-medium text-neutral-500">Sin Bonos Exclusivos</span></div>
+               </div>
+
+               <button onClick={() => {
+                  if ((window as any).fbq) (window as any).fbq('track', 'InitiateCheckout');
+                  setTimeout(() => window.location.href = "https://pay.hotmart.com/L105225408E?off=6x482u1i&checkoutMode=10", 300);
+               }} className="w-full py-3.5 md:py-4 rounded-full font-black text-sm md:text-base text-center bg-white text-black hover:scale-[1.02] transition-transform">
+                  Obtener Plan Anual
+               </button>
+            </div>
+
+            <div className="bg-[#0a0a0a] rounded-[2.5rem] p-8 md:p-10 border border-green-500/20 shadow-[0_0_40px_rgba(34,197,94,0.1)] text-left relative overflow-hidden">
+               <div className="absolute -right-12 top-6 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest py-1 px-12 rotate-45">RECOMENDADO</div>
                <div className="inline-block bg-white text-black text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-6 md:mb-8">Premium Vitalicio</div>
                <h3 className="text-xl md:text-2xl font-black text-white mb-2 md:mb-3">Alfred Mayordomo</h3>
                <p className="text-neutral-400 text-xs md:text-sm font-medium mb-6">El asistente completo para tu vida y negocio. Sin pagos mensuales.</p>
